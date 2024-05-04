@@ -1,0 +1,26 @@
+
+œpython:S1192ø
+"]Define a constant instead of duplicating this literal "admin/%s/popup_response.html" 3 times.(¡ÒĞĞJ$8d3d61ef-bf0d-4e17-8b1f-3e17ff61064e
+‹python:S1192ª"LDefine a constant instead of duplicating this literal "admin:index" 3 times.(¢ˆ‡°J$179c08ac-ff81-420e-a253-c3f7b12511c3
+–python:S1192±	"WDefine a constant instead of duplicating this literal "admin:%s_%s_changelist" 3 times.(¿Ê®ğJ$c09a58c6-ca2c-464b-ac3d-2ef515a96bb3
+™python:S1192ù
+"ZDefine a constant instead of duplicating this literal "admin/popup_response.html" 3 times.(Â¼ŸJ$5e622266-d0fa-4531-bf35-f64691475280
+¤python:S1192ö
+"`Define a constant instead of duplicating this literal "admin/%s/%s/popup_response.html" 3 times.(ñ£óÄşÿÿÿÿJ$12a36b49-6f24-4eca-8e6f-c56d7f24e891
+spython:S1066ù"/Merge this if statement with the enclosing one.(â©¼—ÿÿÿÿÿJ$14657b7e-ad3a-4df1-b608-1224156b3502
+’python:S3776"TRefactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.(ÍÖTJ$4e6662cd-a696-43f2-a35d-dd80ad5fafec
+spython:S1135²"4Complete the task associated to this "TODO" comment.(ÚÈñùJ$ea5753a0-3439-475a-a243-c2c1b0edc6ab
+“python:S3776Â"TRefactor this function to reduce its Cognitive Complexity from 24 to the 15 allowed.(Œ›¹åJ$623d8306-f21e-42ec-83ba-e634aae0762e
+python:S117ß"[Rename this local variable "ChangeList" to match the regular expression ^[_a-z][a-z0-9_]*$.(²ã‘¬ûÿÿÿÿJ$b34512d4-ff59-4abf-96c0-ec9f0f12580a
+jpython:S5806†"+Rename this variable; it shadows a builtin.(Ó£°±J$1ce13eeb-822a-4fed-ba6b-7f98929531ba
+“python:S3776ğ"TRefactor this function to reduce its Cognitive Complexity from 30 to the 15 allowed.(åŒÃªJ$dd253731-763c-41e8-9c36-8b429f6abbd1
+˜python:S3776Í
+"TRefactor this function to reduce its Cognitive Complexity from 16 to the 15 allowed.(èÎ’öúÿÿÿÿJ$8c889f1e-c4d7-44c9-a650-f0f9f358ce01
+˜python:S117¯"ZRename this local variable "ModelForm" to match the regular expression ^[_a-z][a-z0-9_]*$.(é¹ùÄJ$cac3dbd4-e71c-41f5-a274-d8bae280e16c
+˜python:S3776"TRefactor this function to reduce its Cognitive Complexity from 49 to the 15 allowed.(»íŞóøÿÿÿÿJ$2dc0b1c8-f3df-4062-a2f8-c9d052fea003
+›python:S117‘"XRename this local variable "FormSet" to match the regular expression ^[_a-z][a-z0-9_]*$.(Ë–ÏıÿÿÿÿJ$1d00290f-33fe-4f12-a517-bb9d9e578576
+“python:S3776¶"TRefactor this function to reduce its Cognitive Complexity from 46 to the 15 allowed.(Ñš—J$10147997-db26-49b7-98f1-88fed7fa9620
+–python:S117Œ"XRename this local variable "FormSet" to match the regular expression ^[_a-z][a-z0-9_]*$.(í‘¯J$aaad2cfe-32f6-4a83-87e3-2be1be843656
+“python:S3776„"TRefactor this function to reduce its Cognitive Complexity from 17 to the 15 allowed.(ÿÃ¼ŒJ$1d5ccdaa-1c32-4f2f-93de-42df70e5f8fb
+“python:S3776ã"TRefactor this function to reduce its Cognitive Complexity from 23 to the 15 allowed.(é¿ÂJ$2670d026-4be9-4aef-954d-2bbd4e1c38fb
+mpython:S2638Ş".Remove parameter obj or provide default value.(â¨»J$fb853a5a-67d7-46c8-92b4-b32fcac9fea0
