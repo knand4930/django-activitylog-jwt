@@ -1,5 +1,8 @@
 from setuptools import setup
 
+with open("readME.md", "r") as f:
+    description = f.read()
+
 setup(
     name='django-activitylog-jwt',
     version='1.0.0',
@@ -21,4 +24,5 @@ setup(
         'PyJWT>=1.7.1',
         'wheel>=0.43.0',
     ],
+    long_description=description,
 )
