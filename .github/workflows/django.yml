@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@main
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@main
         with:
           python-version: 3.12
 
@@ -32,7 +32,7 @@ jobs:
         run: python setup.py sdist
 
       - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@v1
+        uses: pypa/gh-action-pypi-publish@main
         with:
           password: ${{ secrets.access_pypi_password }}
           repository_url: https://upload.pypi.org/legacy/
