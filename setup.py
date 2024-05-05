@@ -9,7 +9,7 @@ setup(
     author_email='knand4930@gmail.com',
     license='MIT',
     url='https://github.com/knand4930/django-activitylog-jwt.git',
-    packages=['your_package'],
+    packages=['activitylog'],
     install_requires=[
         'djangorestframework>=3.15.1',
         'djangorestframework-jwt>=1.11.0',
@@ -19,5 +19,6 @@ setup(
         'maxminddb>=2.6.1',
         'multidict>=6.0.5',
         'PyJWT>=1.7.1',
+        'wheel>=0.43.0',
     ],
 )

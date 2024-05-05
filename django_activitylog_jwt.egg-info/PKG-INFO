@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: django-activitylog-jwt
+Version: 1.0.0
+Summary: Get started with django-activitylog-jwt today to bolster the security and audit capabilities of your Django application while leveraging the power of JWT authentication.
+Home-page: https://github.com/knand4930/django-activitylog-jwt.git
+Author: Nand Kishore
+Author-email: knand4930@gmail.com
+License: MIT
+Requires-Dist: djangorestframework>=3.15.1
+Requires-Dist: djangorestframework-jwt>=1.11.0
+Requires-Dist: frozenlist>=1.4.1
+Requires-Dist: geoip2>=4.8.0
+Requires-Dist: idna>=3.7
+Requires-Dist: maxminddb>=2.6.1
+Requires-Dist: multidict>=6.0.5
+Requires-Dist: PyJWT>=1.7.1

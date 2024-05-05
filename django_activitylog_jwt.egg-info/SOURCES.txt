@@ -1,0 +1,16 @@
+setup.py
+activitylog/__init__.py
+activitylog/admin.py
+activitylog/admin_helpers.py
+activitylog/apps.py
+activitylog/backends.py
+activitylog/crudhistory_admin_mixin.py
+activitylog/models.py
+activitylog/settings.py
+activitylog/tests.py
+activitylog/utils.py
+django_activitylog_jwt.egg-info/PKG-INFO
+django_activitylog_jwt.egg-info/SOURCES.txt
+django_activitylog_jwt.egg-info/dependency_links.txt
+django_activitylog_jwt.egg-info/requires.txt
+django_activitylog_jwt.egg-info/top_level.txt
