@@ -13,6 +13,11 @@ setup(
     license='MIT',
     url='https://github.com/knand4930/django-activitylog-jwt.git',
     packages=['activitylog'],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
     install_requires=[
         'djangorestframework>=3.15.1',
         'djangorestframework-jwt>=1.11.0',
