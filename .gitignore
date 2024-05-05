@@ -1,6 +1,42 @@
-venv
-/venv
+# Python cache files
+__pycache__
+
+# Python bytecode files
+*.pyc
+
+# Virtual environment directories
 venv/
-db.sqlite3
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.iml
+
+# Compiled Python files
+*.pyc
+*.pyo
+
+# Ignore logs and temporary files
+*.log
+*.swp
+*.swo
+*.bak
+
+# Ignore any build output or distribution directories
+build/
+dist/
+
+# Ignore environment-specific files
+*.env
+.envrc
+
+# Ignore system or OS-specific files
+.DS_Store
+Thumbs.db
+
 .db.sqlite3
-.idea
+db.sqlite3
+/db.sqlite3
+db.sqlite3/
