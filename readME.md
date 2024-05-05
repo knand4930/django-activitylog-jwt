@@ -9,7 +9,7 @@ The Django Activity Log package provides a comprehensive solution for logging va
 1. Install the package via pip:
 
 ```bash
-pip install django-activity-log
+pip install django_activitylog_jwt-1.0.0
 ```
 
 2. Add 'activitylog' to your INSTALLED_APPS list in settings.py:
