@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@main
+        uses: actions/checkout@v2
 
       - name: Set up Python 3.12
-        uses: actions/setup-python@main
+        uses: actions/setup-python@v2
         with:
           python-version: 3.12
 
@@ -29,7 +29,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=1024 --statistics
 
       - name: Build binary wheel and source tarball
-        run: python setup.py sdist
+        run: python setup.py sdist bdist_wheel
 
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@main
