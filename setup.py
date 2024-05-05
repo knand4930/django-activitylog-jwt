@@ -5,7 +5,7 @@ with open("readME.md", "r") as f:
 
 setup(
     name='django-activitylog-jwt',
-    version='1.0.0',
+    version='1.0.1',
     description='Get started with django-activitylog-jwt today to bolster the security and audit capabilities of your '
                 'Django application while leveraging the power of JWT authentication.',
     author='Nand Kishore',
