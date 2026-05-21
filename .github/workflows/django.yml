@@ -1,39 +1,335 @@
-name: Django Activity Log
+# =============================================================================
+# django-activitylog-jwt — CI / CD Pipeline
+# =============================================================================
+#
+# Jobs (in dependency order)
+# ──────────────────────────
+#  lint         Ruff linting + format check               (every push & PR)
+#  test         pytest matrix: Python 3.10–3.13 × Django 4.2–5.2
+#  type-check   mypy static analysis                      (informational)
+#  security     pip-audit dependency vulnerability scan   (every push & PR)
+#  build        Build wheel + sdist, verify with twine    (every push & PR)
+#  publish      Upload to PyPI                            (version tags v* only)
+#
+# Triggers
+# ────────
+#  push          → main, develop         runs lint + test + type-check + security + build
+#  pull_request  → main                  same as above
+#  push tags     → v*.*.*                all of the above + publish to PyPI
+#  workflow_dispatch                     manual run of the full pipeline
+#
+# Required repository secrets
+# ───────────────────────────
+#  PYPI_API_TOKEN    PyPI API token (Settings → Secrets → Actions)
+#                    Generate at https://pypi.org/manage/account/token/
+#                    Set scope to "Entire account" or the specific project.
+#
+# Optional repository secrets
+# ───────────────────────────
+#  CODECOV_TOKEN     Codecov upload token (for private repos)
+#                    Public repos: token is not required.
+# =============================================================================
+
+name: CI / CD
 
 on:
+  push:
+    branches: [ "main", "develop" ]
+    tags:     [ "v*.*.*" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
-jobs:
-  python-build-n-publish:
-    name: Build and publish Python distribution
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+# Cancel any in-progress run on the same branch / PR to avoid wasted minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v2
+# Minimal permissions — only escalate where required (publish job).
+permissions:
+  contents: read
+
+# ---------------------------------------------------------------------------
+# Shared environment variables
+# ---------------------------------------------------------------------------
+env:
+  PYTHON_DEFAULT: "3.12"   # used for jobs that don't need a matrix
+  FORCE_COLOR: "1"         # coloured output in Ruff / pytest
+
+# =============================================================================
+# JOB 1 — Lint (Ruff)
+# =============================================================================
+jobs:
+  lint:
+    name: "Lint — Ruff"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_DEFAULT }}
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: ${{ env.PYTHON_DEFAULT }}
+          cache: pip
+
+      - name: Install Ruff
+        run: pip install "ruff>=0.4"
+
+      # Check for code style violations.
+      - name: Ruff — lint
+        run: ruff check activitylog/ tests/
+
+      # Verify formatting without modifying files.
+      - name: Ruff — format check
+        run: ruff format --check activitylog/ tests/
+
+# =============================================================================
+# JOB 2 — Test Matrix
+# =============================================================================
+  test:
+    name: "Test — py${{ matrix.python-version }} / Django ${{ matrix.django-version }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: lint
+
+    strategy:
+      fail-fast: false      # keep running other matrix cells when one fails
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        django-version: ["4.2", "5.0", "5.1", "5.2"]
+        exclude:
+          # Django 4.2 is not officially tested on Python 3.13
+          - python-version: "3.13"
+            django-version: "4.2"
+          # Django 5.0 does not support Python 3.13
+          - python-version: "3.13"
+            django-version: "5.0"
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      # Install the package with optional test deps; pin the Django version.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "Django==${{ matrix.django-version }}.*"
+          pip install -e ".[jwt,filters,celery,encryption]"
+          pip install \
+            pytest>=8.0 \
+            pytest-django>=4.8 \
+            pytest-asyncio>=0.23 \
+            "coverage[toml]>=7.4"
+
+      # Run tests with branch coverage.
+      - name: Run pytest
+        env:
+          DJANGO_SETTINGS_MODULE: tests.settings
+        run: |
+          coverage run -m pytest \
+            --tb=short \
+            -q
+
+      # Generate coverage reports for upload.
+      - name: Generate coverage reports
+        run: |
+          coverage report --show-missing
+          coverage xml -o coverage.xml
+          coverage html -d htmlcov
+
+      # Upload XML report to Codecov (merges reports from all matrix cells).
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          flags: "py${{ matrix.python-version }}-django${{ matrix.django-version }}"
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}   # optional for public repos
+
+      # Retain HTML coverage report as a downloadable artifact (useful for PRs).
+      - name: Upload HTML coverage report
+        if: matrix.python-version == env.PYTHON_DEFAULT && matrix.django-version == '5.2'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: htmlcov/
+          retention-days: 14
+
+# =============================================================================
+# JOB 3 — Type Checking (mypy)
+# =============================================================================
+  type-check:
+    name: "Type Check — mypy"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: lint
+    # Failures here are informational — they do not block publish.
+    continue-on-error: true
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_DEFAULT }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_DEFAULT }}
+          cache: pip
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install . flake8
+          pip install -e ".[jwt,filters,celery,encryption]"
+          pip install \
+            "mypy>=1.9" \
+            "django-stubs>=5.0" \
+            "djangorestframework-stubs>=3.15"
 
-      - name: Lint with Flake8
-        run: |
-          # Stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings.
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=1024 --statistics
+      - name: Run mypy
+        run: mypy activitylog/ --ignore-missing-imports
 
-      - name: Build binary wheel and source tarball
-        run: python setup.py sdist bdist_wheel
+# =============================================================================
+# JOB 4 — Security Audit
+# =============================================================================
+  security:
+    name: "Security — pip-audit"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
 
-      - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@master
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_DEFAULT }}
+        uses: actions/setup-python@v5
         with:
-          username: __token__
-          password: ${{ secrets.access_pypi_password }}
-          repository_url: https://upload.pypi.org/legacy/
+          python-version: ${{ env.PYTHON_DEFAULT }}
+          cache: pip
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit dependencies for known CVEs
+        run: |
+          pip install -e ".[all]"
+          pip-audit --desc --strict
+
+# =============================================================================
+# JOB 5 — Build Distribution
+# =============================================================================
+  build:
+    name: "Build — wheel + sdist"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [ test, security ]
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          # Full history needed so setuptools-scm (if ever adopted) can derive
+          # the version from git tags.
+          fetch-depth: 0
+
+      - name: Set up Python ${{ env.PYTHON_DEFAULT }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_DEFAULT }}
+          cache: pip
+
+      - name: Install build tools
+        run: pip install build twine
+
+      # Build using PEP 517 (pyproject.toml) instead of the deprecated
+      # `python setup.py sdist bdist_wheel` command.
+      - name: Build wheel and source distribution
+        run: python -m build
+
+      # Validate package metadata, long description rendering, and dist
+      # integrity before uploading to PyPI.
+      - name: Check distributions with twine
+        run: twine check --strict dist/*
+
+      # Upload the built artifacts so the publish job can download them
+      # without rebuilding (ensures identical files reach PyPI).
+      - name: Upload distribution artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
+# =============================================================================
+# JOB 6 — Publish to PyPI
+# =============================================================================
+  publish:
+    name: "Publish — PyPI"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Only publish on version tags pushed to the repository.
+    # Pull requests and branch pushes never trigger this job.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: build
+
+    # Elevated permissions required for OIDC-based trusted publishing.
+    # If you are using a PYPI_API_TOKEN secret instead, these can be removed.
+    permissions:
+      contents: read
+      id-token:  write   # required for PyPI trusted publishing (OIDC)
+
+    environment:
+      name: pypi
+      url: https://pypi.org/project/django-activitylog-jwt/
+
+    steps:
+      - name: Download distribution artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist/
+
+      - name: List artifacts to be published
+        run: ls -lh dist/
+
+      # ── Option A: Trusted Publishing (OIDC) — no long-lived secrets needed ──
+      # Configure at https://pypi.org/manage/project/django-activitylog-jwt/settings/
+      # under "Trusted Publishers". Add this repository + workflow file name.
+      - name: Publish to PyPI (Trusted Publishing)
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # Remove the `with` block below to use Trusted Publishing (OIDC).
+        # Keep it only if you are using a PYPI_API_TOKEN secret instead.
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      # ── Option B: API Token secret (legacy) ──
+      # Uncomment the block below and remove Option A if OIDC is not configured.
+      # - name: Publish to PyPI (API Token)
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     password: ${{ secrets.PYPI_API_TOKEN }}
+
+      # Create a GitHub Release automatically from the tag.
+      - name: Checkout for release notes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
