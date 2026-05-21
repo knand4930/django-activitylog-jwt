@@ -1,42 +1,170 @@
-# Python cache files
-__pycache__
+# =============================================================================
+# django-activitylog-jwt — .gitignore
+# =============================================================================
 
-# Python bytecode files
-*.pyc
+# -----------------------------------------------------------------------------
+# Python bytecode & caches
+# -----------------------------------------------------------------------------
+__pycache__/
+**/__pycache__/
+# .pyc  .pyo  .pyd
+*.py[cod]
+# compiled C extensions
+*.so
 
-# Virtual environment directories
+# -----------------------------------------------------------------------------
+# Package / build artefacts
+# -----------------------------------------------------------------------------
+*.egg-info/
+*.egg
+MANIFEST
+dist/
+build/
+wheels/
+sdist/
+.eggs/
+
+# -----------------------------------------------------------------------------
+# Virtual environments
+# -----------------------------------------------------------------------------
+.venv/
 venv/
 env/
+ENV/
+env.bak/
+venv.bak/
 
-# IDE and editor files
+# -----------------------------------------------------------------------------
+# Django
+# -----------------------------------------------------------------------------
+*.sqlite3
+db.sqlite3
+local_settings.py
+media/
+staticfiles/
+static_root/
+
+# -----------------------------------------------------------------------------
+# Environment & secrets
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+.envrc
+# RSA / EC private and public key files
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+
+# -----------------------------------------------------------------------------
+# Test & coverage artefacts
+# -----------------------------------------------------------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+nosetests.xml
+test-results/
+junit.xml
+.tox/
+.nox/
+
+# -----------------------------------------------------------------------------
+# Type checkers
+# -----------------------------------------------------------------------------
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+.pyre/
+
+# -----------------------------------------------------------------------------
+# Linters & formatters
+# -----------------------------------------------------------------------------
+.ruff_cache/
+
+# -----------------------------------------------------------------------------
+# Documentation builds
+# -----------------------------------------------------------------------------
+docs/_build/
+docs/site/
+site/
+.readthedocs/
+
+# -----------------------------------------------------------------------------
+# Jupyter Notebooks
+# -----------------------------------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb
+
+# -----------------------------------------------------------------------------
+# IDEs & editors
+# -----------------------------------------------------------------------------
 .vscode/
 .idea/
-*.sublime-workspace
 *.iml
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+*.code-workspace
+.history/
 
-# Compiled Python files
-*.pyc
-*.pyo
+# -----------------------------------------------------------------------------
+# OS artefacts
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
 
-# Ignore logs and temporary files
+# -----------------------------------------------------------------------------
+# Logs & temp files
+# -----------------------------------------------------------------------------
 *.log
+*.log.*
 *.swp
 *.swo
+*.swn
 *.bak
+*.tmp
+*.temp
+*.orig
 
-# Ignore any build output or distribution directories
-build/
-dist/
+# -----------------------------------------------------------------------------
+# GeoIP database (large binary — download separately)
+# -----------------------------------------------------------------------------
+activitylog/local/*.mmdb
+*.mmdb
 
-# Ignore environment-specific files
-*.env
-.envrc
+# -----------------------------------------------------------------------------
+# Celery
+# -----------------------------------------------------------------------------
+celerybeat-schedule
+celerybeat-schedule.*
+celerybeat.pid
 
-# Ignore system or OS-specific files
-.DS_Store
-Thumbs.db
+# -----------------------------------------------------------------------------
+# Docker
+# -----------------------------------------------------------------------------
+.dockerignore
+docker-compose.override.yml
 
-.db.sqlite3
-db.sqlite3
-/db.sqlite3
-db.sqlite3/
+# -----------------------------------------------------------------------------
+# Node (if any frontend tooling lives here)
+# -----------------------------------------------------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.yarn/

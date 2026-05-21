@@ -1,111 +1,102 @@
+"""Signal handlers for authentication events (login / logout / failed login)."""
+
+from __future__ import annotations
+
 import contextlib
+import logging
 
-from django.contrib.auth import get_user_model, signals
-from django.db import transaction
-from django.utils.module_loading import import_string
-from activitylog.middleware.middleware import get_current_request, set_local_details
-from activitylog.models import LoginEvent
-from django.contrib.gis.geoip2 import GeoIP2
+from django.contrib.auth import signals
 
+from activitylog.middleware.middleware import set_local_details
 from activitylog.settings import (
-    DATABASE_ALIAS,
-    LOGGING_BACKEND,
+    GNOME_SHELL_SESSION_MODE,
+    HTTP_SEC_CH_UA,
+    HTTP_SEC_CH_UA_PLATFORM,
     REMOTE_ADDR_HEADER,
-    WATCH_AUTH_EVENTS, HTTP_SEC_CH_UA, HTTP_SEC_CH_UA_PLATFORM, GNOME_SHELL_SESSION_MODE,
+    WATCH_AUTH_EVENTS,
 )
-from activitylog.utils import should_propagate_exceptions
+from activitylog.utils import get_geo_data, should_propagate_exceptions
 
-audit_logger = import_string(LOGGING_BACKEND)()
-
-
-def get_user_auth_location():
-    remote_ip = None
-    browser = None
-    platform = None
-    operating_system = None
-    with contextlib.suppress(Exception):
-        address = set_local_details()
-        remote_ip = address.META.get(REMOTE_ADDR_HEADER, None)
-        browser = address.META.get(HTTP_SEC_CH_UA, None)
-        platform = address.META.get(HTTP_SEC_CH_UA_PLATFORM, None)
-        operating_system = address.META.get(GNOME_SHELL_SESSION_MODE, None)
-
-    return remote_ip, browser, platform, operating_system
+logger = logging.getLogger(__name__)
 
 
-def user_logged_in(sender, request, user, **kwargs):
-    remote_ip, browser, platform, operating_system = get_user_auth_location()
-    try:
-        g = GeoIP2()
-        lat, long = g.lat_lon(remote_ip)
-        city = g.city(remote_ip)
-        country = g.country(remote_ip)
-    except Exception:
-        lat = None
-        long = None
-        city = None
-        country = None
+def _request_meta(request) -> dict:
+    return {
+        "remote_ip": request.META.get(REMOTE_ADDR_HEADER, ""),
+        "browser": request.META.get(HTTP_SEC_CH_UA, ""),
+        "platform": request.META.get(HTTP_SEC_CH_UA_PLATFORM, ""),
+        "operating_system": request.META.get(GNOME_SHELL_SESSION_MODE, ""),
+        "user_agent": request.META.get("HTTP_USER_AGENT", ""),
+    }
 
-    print(remote_ip, "remote ip has been printed !!")
+
+def user_logged_in(sender, request, user, **kwargs) -> None:  # noqa: ARG001
+    from activitylog.models import LoginEvent
+    from activitylog.tasks.log_tasks import dispatch_log_task
+
+    meta = _request_meta(request)
+    geo = get_geo_data(meta["remote_ip"])
 
     try:
-        with transaction.atomic(using=DATABASE_ALIAS):
-            audit_logger.login(
-                {
-                    "login_type": LoginEvent.LOGIN,
-                    "username": getattr(user, user.USERNAME_FIELD),
-                    "user_id": getattr(user, "id", None),
-                    "remote_ip": remote_ip,
-                    "latitude": lat,
-                    "longitude": long,
-                    "city": city,
-                    "country": country,
-                    "browser": browser,
-                    "platform": platform,
-                    "operating_system": operating_system,
-                }
-            )
+        dispatch_log_task("login", {
+            "login_type": LoginEvent.LOGIN,
+            "username": getattr(user, user.USERNAME_FIELD, ""),
+            "user_id": getattr(user, "id", None),
+            **meta,
+            **geo,
+        })
     except Exception:
+        logger.exception("auth_signals.user_logged_in failed")
         if should_propagate_exceptions():
             raise
 
 
-def user_logged_out(sender, request, user, **kwargs):
+def user_logged_out(sender, request, user, **kwargs) -> None:  # noqa: ARG001
+    from activitylog.models import LoginEvent
+    from activitylog.tasks.log_tasks import dispatch_log_task
+
+    if user is None:
+        return
+
+    meta = _request_meta(request)
+    geo = get_geo_data(meta["remote_ip"])
+
     try:
-        with transaction.atomic(using=DATABASE_ALIAS):
-            audit_logger.login(
-                {
-                    "login_type": LoginEvent.LOGOUT,
-                    "username": getattr(user, user.USERNAME_FIELD),
-                    "user_id": getattr(user, "id", None),
-                    "remote_ip": request.META.get(REMOTE_ADDR_HEADER, ""),
-                    "browser": request.META.get(HTTP_SEC_CH_UA, ""),
-                    "platform": request.META.get(HTTP_SEC_CH_UA_PLATFORM, ""),
-                    "operating_system": request.META.get(GNOME_SHELL_SESSION_MODE, ""),
-                }
-            )
+        dispatch_log_task("login", {
+            "login_type": LoginEvent.LOGOUT,
+            "username": getattr(user, user.USERNAME_FIELD, ""),
+            "user_id": getattr(user, "id", None),
+            **meta,
+            **geo,
+        })
     except Exception:
+        logger.exception("auth_signals.user_logged_out failed")
         if should_propagate_exceptions():
             raise
 
 
-def user_login_failed(sender, credentials, **kwargs):
+def user_login_failed(sender, credentials, **kwargs) -> None:  # noqa: ARG001
+    from activitylog.models import LoginEvent
+    from activitylog.tasks.log_tasks import dispatch_log_task
+    from django.contrib.auth import get_user_model
+
+    request = set_local_details()
+    if request is None:
+        return
+
+    meta = _request_meta(request)
+    geo = get_geo_data(meta["remote_ip"])
+    username_field = get_user_model().USERNAME_FIELD
+
     try:
-        with transaction.atomic(using=DATABASE_ALIAS):
-            request = get_current_request()
-            user_model = get_user_model()
-            audit_logger.login(
-                {
-                    "login_type": LoginEvent.FAILED,
-                    "username": credentials[user_model.USERNAME_FIELD],
-                    "remote_ip": request.META.get(REMOTE_ADDR_HEADER, ""),
-                    "browser": request.META.get(HTTP_SEC_CH_UA, ""),
-                    "platform": request.META.get(HTTP_SEC_CH_UA_PLATFORM, ""),
-                    "operating_system": request.META.get(GNOME_SHELL_SESSION_MODE, ""),
-                }
-            )
-            # print()
+        dispatch_log_task("login", {
+            "login_type": LoginEvent.FAILED,
+            "username": credentials.get(username_field, ""),
+            **meta,
+            **geo,
+        })
     except Exception:
+        logger.exception("auth_signals.user_login_failed failed")
         if should_propagate_exceptions():
             raise
 

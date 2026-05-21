@@ -1,0 +1,194 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+# ---------------------------------------------------------------------------
+# Project metadata  (PEP 621)
+# ---------------------------------------------------------------------------
+[project]
+name = "django-activitylog-jwt"
+version = "2.0.0"
+description = """\
+Production-ready Django activity logging: async Celery processing, \
+multi-database support (PostgreSQL, ClickHouse, MongoDB, ScyllaDB, MySQL), \
+DRF REST APIs, real-time WebSocket/SSE streaming, RBAC, retention policies, \
+SHA-256 tamper-proof integrity hashing, and JWT authentication. \
+Supports Django 4.x – 6.x and Python 3.10 – 3.13+.\
+"""
+readme = "readME.md"
+license = { text = "MIT" }
+authors = [{ name = "Nand Kishore", email = "knand4930@gmail.com" }]
+keywords = [
+    "django", "activity-log", "audit-log", "jwt", "celery", "clickhouse",
+    "mongodb", "drf", "rest-framework", "logging", "monitoring",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: Log Analysis",
+    "Topic :: System :: Logging",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+
+# Minimum supported versions
+requires-python = ">=3.10"
+
+# Core dependencies — always installed
+dependencies = [
+    "Django>=4.2",
+    "djangorestframework>=3.14.0",
+    "geoip2>=4.8.0",
+]
+
+# ---------------------------------------------------------------------------
+# Optional feature groups
+# ---------------------------------------------------------------------------
+[project.optional-dependencies]
+
+# Async log processing via Celery
+celery = ["celery>=5.3.0"]
+
+# JWT — simplejwt is the maintained library; legacy jwt also accepted at runtime
+jwt = ["djangorestframework-simplejwt>=5.3.0"]
+
+# Filtering / searching in the DRF API
+filters = ["django-filter>=23.0"]
+
+# Real-time WebSocket streaming (Django Channels + Redis layer)
+websocket = [
+    "channels>=4.0.0",
+    "channels-redis>=4.1.0",
+]
+
+# ClickHouse high-volume analytics backend
+clickhouse = ["clickhouse-driver>=0.2.7"]
+
+# MongoDB backend
+mongodb = ["pymongo>=4.6.0"]
+
+# ScyllaDB / Apache Cassandra backend
+scylladb = ["cassandra-driver>=3.28.0"]
+
+# Credential encryption for DatabaseConfig passwords
+encryption = ["cryptography>=42.0.0"]
+
+# Excel export from the API
+excel = ["openpyxl>=3.1.0"]
+
+# Development extras
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "pytest-asyncio>=0.23",
+    "coverage[toml]>=7.4",
+    "ruff>=0.4",
+    "mypy>=1.9",
+    "django-stubs>=5.0",
+    "djangorestframework-stubs>=3.15",
+]
+
+# Convenience: everything
+all = [
+    "celery>=5.3.0",
+    "djangorestframework-simplejwt>=5.3.0",
+    "django-filter>=23.0",
+    "channels>=4.0.0",
+    "channels-redis>=4.1.0",
+    "clickhouse-driver>=0.2.7",
+    "pymongo>=4.6.0",
+    "cassandra-driver>=3.28.0",
+    "cryptography>=42.0.0",
+    "openpyxl>=3.1.0",
+]
+
+[project.urls]
+Homepage    = "https://github.com/knand4930/django-activitylog-jwt"
+Repository  = "https://github.com/knand4930/django-activitylog-jwt"
+"Bug Tracker" = "https://github.com/knand4930/django-activitylog-jwt/issues"
+Documentation = "https://django-activitylog-jwt.readthedocs.io"
+
+# ---------------------------------------------------------------------------
+# Setuptools configuration
+# ---------------------------------------------------------------------------
+[tool.setuptools.packages.find]
+where   = ["."]
+include = ["activitylog*"]
+exclude = ["tests*", "docs*"]
+
+[tool.setuptools.package-data]
+activitylog = [
+    "local/*.mmdb",
+    "templates/**/*.html",
+    "py.typed",
+]
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+python_files   = ["tests.py", "test_*.py", "*_tests.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = ["--reuse-db", "-v"]
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source   = ["activitylog"]
+omit     = ["*/migrations/*", "*/tests/*", "*/test_*"]
+branch   = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "except ImportError",
+]
+
+# ---------------------------------------------------------------------------
+# Ruff (linting + formatting)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length    = 100
+target-version = "py310"
+src            = ["activitylog"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # function calls in default args (common in Django)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"*/migrations/*.py" = ["E501"]
+"tests/*.py"        = ["S101"]
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.10"
+plugins        = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+strict         = false
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "tests.settings"
