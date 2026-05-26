@@ -311,11 +311,11 @@ jobs:
     name: "Publish — PyPI"
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Publish automatically for version tags, or manually when explicitly
-    # requested from workflow_dispatch. Branch pushes and PRs never publish.
+    # Publish automatically for version tags, or whenever the workflow is run manually.
+    # Branch pushes and PRs never publish.
     if: >-
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-      (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi)
+      github.event_name == 'workflow_dispatch'
     needs: build
 
     # Elevated permissions required for OIDC-based trusted publishing.
@@ -329,7 +329,7 @@ jobs:
       url: https://pypi.org/project/django-activitylog-jwt/
 
     env:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN || secrets.access_pypi_password }}
 
     steps:
       - name: Download distribution artifacts
@@ -347,7 +347,8 @@ jobs:
         if: env.PYPI_API_TOKEN != ''
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          username: __token__
+          password: ${{ env.PYPI_API_TOKEN }}
           skip-existing: true
 
       # ── Option B: Trusted Publishing (OIDC) — no long-lived secrets needed ──
