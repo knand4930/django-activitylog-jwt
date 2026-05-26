@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
-from typing import Any, Dict
+from typing import Any
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -45,7 +45,7 @@ class BaseEvent(models.Model):
     class Meta:
         abstract = True
 
-    def _hash_fields(self) -> Dict[str, Any]:
+    def _hash_fields(self) -> dict[str, Any]:
         raise NotImplementedError
 
     def compute_integrity_hash(self) -> str:
@@ -111,7 +111,7 @@ class CRUDEvent(BaseEvent):
     def is_delete(self):
         return self.event_type == self.DELETE
 
-    def _hash_fields(self) -> Dict[str, Any]:
+    def _hash_fields(self) -> dict[str, Any]:
         return {
             "id": str(self.id),
             "event_type": self.event_type,
@@ -161,7 +161,7 @@ class LoginEvent(BaseEvent):
     )
     session_key = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Session key"))
 
-    def _hash_fields(self) -> Dict[str, Any]:
+    def _hash_fields(self) -> dict[str, Any]:
         return {
             "id": str(self.id),
             "login_type": self.login_type,
@@ -201,7 +201,7 @@ class RequestEvent(BaseEvent):
         on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
     )
 
-    def _hash_fields(self) -> Dict[str, Any]:
+    def _hash_fields(self) -> dict[str, Any]:
         return {
             "id": str(self.id),
             "url": self.url,
@@ -239,7 +239,7 @@ class CorsEvent(BaseEvent):
         on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
     )
 
-    def _hash_fields(self) -> Dict[str, Any]:
+    def _hash_fields(self) -> dict[str, Any]:
         return {
             "id": str(self.id),
             "url": self.url,
@@ -304,7 +304,7 @@ class SystemEvent(BaseEvent):
         on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
     )
 
-    def _hash_fields(self) -> Dict[str, Any]:
+    def _hash_fields(self) -> dict[str, Any]:
         return {
             "id": str(self.id),
             "event_name": self.event_name,
@@ -424,7 +424,7 @@ class DatabaseConfig(models.Model):
             except Exception:
                 self._password = value
 
-    def get_django_db_config(self) -> Dict[str, Any]:
+    def get_django_db_config(self) -> dict[str, Any]:
         """Return a Django DATABASES-compatible dict for this config."""
         engine_map = {
             self.POSTGRESQL: "django.db.backends.postgresql",

@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 _FERNET_AVAILABLE = False
 try:
-    from cryptography.fernet import Fernet, InvalidToken
+    from cryptography.fernet import Fernet
+
     _FERNET_AVAILABLE = True
 except ImportError:
     pass
@@ -73,7 +74,13 @@ class IntegrityChecker:
 
     def _get_models(self):
         if self.MODELS is None:
-            from activitylog.models import CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent
+            from activitylog.models import (
+                CorsEvent,
+                CRUDEvent,
+                LoginEvent,
+                RequestEvent,
+                SystemEvent,
+            )
             self.MODELS = [CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent]
         return self.MODELS
 

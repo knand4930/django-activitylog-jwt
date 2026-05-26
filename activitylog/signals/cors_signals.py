@@ -37,7 +37,6 @@ def _should_log_url(path: str) -> bool:
 def _resolve_user_from_request(cookie_string, authorization_header: str):
     from django.contrib.auth import SESSION_KEY as AUTH_SESSION_KEY
     from django.contrib.auth import get_user_model
-    from django.contrib.sessions.models import Session
     from django.http.cookie import SimpleCookie
 
     User = get_user_model()

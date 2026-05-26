@@ -1,6 +1,6 @@
 """Management command: delete old activity log records."""
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
@@ -23,9 +23,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         from datetime import timedelta
+
         from django.utils import timezone
+
         from activitylog.models import (
-            CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent,
+            CorsEvent,
+            CRUDEvent,
+            LoginEvent,
+            RequestEvent,
+            SystemEvent,
         )
 
         days = options["days"]
@@ -41,10 +47,7 @@ class Command(BaseCommand):
             "system": SystemEvent,
         }
 
-        if event_type == "all":
-            targets = list(model_map.values())
-        else:
-            targets = [model_map[event_type]]
+        targets = list(model_map.values()) if event_type == "all" else [model_map[event_type]]
 
         total = 0
         for model in targets:

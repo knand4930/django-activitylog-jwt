@@ -28,13 +28,13 @@ Access any setting through the module-level ``activitylog_settings`` singleton:
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # ---------------------------------------------------------------------------
 # Default values for every configurable key
 # ---------------------------------------------------------------------------
 
-DEFAULTS: Dict[str, Any] = {
+DEFAULTS: dict[str, Any] = {
     # ------------------------------------------------------------------
     # Feature toggles
     # ------------------------------------------------------------------
@@ -179,7 +179,7 @@ DEFAULTS: Dict[str, Any] = {
 }
 
 # Map old-style ``DJANGO_ACTIVITY_LOG_*`` keys → new-style keys
-_LEGACY_MAP: Dict[str, str] = {
+_LEGACY_MAP: dict[str, str] = {
     "DJANGO_ACTIVITY_LOG_WATCH_AUTH_EVENTS":         "WATCH_AUTH_EVENTS",
     "DJANGO_ACTIVITY_LOG_WATCH_MODEL_EVENTS":        "WATCH_MODEL_EVENTS",
     "DJANGO_ACTIVITY_LOG_WATCH_REQUEST_EVENTS":      "WATCH_REQUEST_EVENTS",
@@ -230,7 +230,7 @@ class _LazySettings:
     3. Package default from ``DEFAULTS``
     """
 
-    _cache: Dict[str, Any]
+    _cache: dict[str, Any]
     _resolved: bool
 
     def __init__(self) -> None:
@@ -240,7 +240,7 @@ class _LazySettings:
     def _resolve(self) -> None:
         from django.conf import settings as dj_settings
 
-        cache: Dict[str, Any] = dict(DEFAULTS)
+        cache: dict[str, Any] = dict(DEFAULTS)
 
         # 1. Apply legacy DJANGO_ACTIVITY_LOG_* keys first (lower priority)
         for legacy_key, new_key in _LEGACY_MAP.items():
@@ -297,7 +297,7 @@ class _LazySettings:
         return raw or "REMOTE_ADDR"
 
     @property
-    def UNREGISTERED_URLS_ALL(self) -> List[str]:
+    def UNREGISTERED_URLS_ALL(self) -> list[str]:
         """Merged unregistered URL list."""
         if not object.__getattribute__(self, "_resolved"):
             self._resolve()

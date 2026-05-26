@@ -38,7 +38,6 @@ def _resolve_user(cookie_string, authorization_header: str):
     """Return the user from session cookie or JWT/Bearer token, or None."""
     from django.contrib.auth import SESSION_KEY as AUTH_SESSION_KEY
     from django.contrib.auth import get_user_model
-    from django.contrib.sessions.models import Session
     from django.http.cookie import SimpleCookie
 
     User = get_user_model()

@@ -18,8 +18,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        from activitylog.models import CorsEvent, CRUDEvent, LoginEvent, RequestEvent, SystemEvent
         from activitylog.security.integrity import IntegrityChecker
-        from activitylog.models import CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent
 
         checker = IntegrityChecker()
         model_name = options.get("model_name")

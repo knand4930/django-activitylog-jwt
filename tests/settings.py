@@ -10,7 +10,7 @@ Supports: Django 4.2 – 6.x  |  Python 3.10 – 3.13+
 """
 
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -52,7 +52,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "tests.urls"
 
-TEMPLATES: List[Dict[str, Any]] = [
+TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
@@ -71,7 +71,7 @@ TEMPLATES: List[Dict[str, Any]] = [
 WSGI_APPLICATION = "tests.wsgi.application"
 ASGI_APPLICATION = "tests.asgi.application"
 
-DATABASES: Dict[str, Dict[str, Any]] = {
+DATABASES: dict[str, dict[str, Any]] = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -95,7 +95,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # ---------------------------------------------------------------------------
 # Django REST Framework
 # ---------------------------------------------------------------------------
-REST_FRAMEWORK: Dict[str, Any] = {
+REST_FRAMEWORK: dict[str, Any] = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         # Uncomment the JWT backend you use:
         # "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -114,7 +114,7 @@ REST_FRAMEWORK: Dict[str, Any] = {
 # All keys shown here are optional — the package works out-of-the-box with
 # zero configuration.  Override only what you need.
 # ---------------------------------------------------------------------------
-ACTIVITYLOG: Dict[str, Any] = {
+ACTIVITYLOG: dict[str, Any] = {
 
     # -----------------------------------------------------------------------
     # Feature toggles

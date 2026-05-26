@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional, Type
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +32,7 @@ class ActivityLogDatabaseRouter:
 
     _CONFIG_MODELS = frozenset({"databaseconfig", "retentionpolicy"})
 
-    def _alias_for_model(self, model: Type, tenant_id: Optional[str] = None) -> Optional[str]:
+    def _alias_for_model(self, model: type, tenant_id: str | None = None) -> str | None:
         """Return the best matching database alias for ``model``, or None."""
         label = model._meta.app_label
         name = model._meta.model_name
@@ -60,22 +59,22 @@ class ActivityLogDatabaseRouter:
 
         return None
 
-    def db_for_read(self, model: Type, **hints: object) -> Optional[str]:
+    def db_for_read(self, model: type, **hints: object) -> str | None:
         return self._alias_for_model(model)
 
-    def db_for_write(self, model: Type, **hints: object) -> Optional[str]:
+    def db_for_write(self, model: type, **hints: object) -> str | None:
         return self._alias_for_model(model)
 
-    def allow_relation(self, obj1: object, obj2: object, **hints: object) -> Optional[bool]:
+    def allow_relation(self, obj1: object, obj2: object, **hints: object) -> bool | None:
         return True
 
     def allow_migrate(
         self,
         db: str,
         app_label: str,
-        model_name: Optional[str] = None,
+        model_name: str | None = None,
         **hints: object,
-    ) -> Optional[bool]:
+    ) -> bool | None:
         if app_label == "activitylog":
             return db == "default"
         return None

@@ -10,6 +10,8 @@ import risk in the original design.
 
 from __future__ import annotations
 
+from typing import Any
+
 from activitylog.conf import activitylog_settings as _s
 
 # ---------------------------------------------------------------------------
@@ -73,7 +75,5 @@ CRUD_DIFFERENCE_CALLBACKS         = _s.CRUD_DIFFERENCE_CALLBACKS
 CRUD_EVENT_NO_CHANGED_FIELDS_SKIP = _s.CRUD_EVENT_NO_CHANGED_FIELDS_SKIP
 TRUNCATE_TABLE_SQL_STATEMENT      = _s.TRUNCATE_TABLE_SQL_STATEMENT
 
-# Resolved at app startup (apps.py) — kept as empty lists here
-from typing import List, Type, Any
-UNREGISTERED_CLASSES: List[Type[Any]] = []
-REGISTERED_CLASSES: List[Type[Any]]   = []
+UNREGISTERED_CLASSES: list[type[Any]] = []
+REGISTERED_CLASSES: list[type[Any]]   = []

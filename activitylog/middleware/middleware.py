@@ -6,8 +6,8 @@ from __future__ import annotations
 import contextlib
 import logging
 import time
+from collections.abc import Callable
 from threading import local
-from typing import Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -103,19 +103,21 @@ class ActivityLogMiddleware:
         We do a best-effort lookup by URL + approximate timestamp.
         """
         try:
-            from activitylog.models import RequestEvent
-            from django.utils import timezone
             from datetime import timedelta
+
+            from django.utils import timezone
+
+            from activitylog.models import RequestEvent
 
             # The request_started signal already created the row; update it.
             # Use a 2-second window to avoid touching the wrong row under load.
             threshold = timezone.now() - timedelta(seconds=2)
 
-            content_length: Optional[int] = None
+            content_length: int | None = None
             with contextlib.suppress(Exception):
                 content_length = int(response.get("Content-Length", 0)) or None
 
-            req_size: Optional[int] = None
+            req_size: int | None = None
             with contextlib.suppress(Exception):
                 req_size = int(request.META.get("CONTENT_LENGTH") or 0) or None
 

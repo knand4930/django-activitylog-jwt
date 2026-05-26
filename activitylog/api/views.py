@@ -3,36 +3,51 @@
 from __future__ import annotations
 
 import csv
-import io
 import json
 import logging
 from datetime import timedelta
 
-from django.db.models import Avg, Count, Q
+from django.db.models import Count
 from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import timezone
-from rest_framework import status, viewsets
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from activitylog.api.filters import (
-    CorsEventFilter, CRUDEventFilter, DatabaseConfigFilter,
-    LoginEventFilter, RequestEventFilter, RetentionPolicyFilter,
+    CorsEventFilter,
+    CRUDEventFilter,
+    DatabaseConfigFilter,
+    LoginEventFilter,
+    RequestEventFilter,
+    RetentionPolicyFilter,
     SystemEventFilter,
 )
 from activitylog.api.permissions import (
-    DatabaseConfigPermission, IsActivityLogAdmin, IsActivityLogViewer,
+    DatabaseConfigPermission,
+    IsActivityLogAdmin,
+    IsActivityLogViewer,
 )
 from activitylog.api.serializers import (
-    ActivitySummarySerializer, CorsEventSerializer, CRUDEventSerializer,
-    DatabaseConfigSerializer, LoginEventSerializer, RequestEventSerializer,
-    RetentionPolicySerializer, SystemEventSerializer,
+    ActivitySummarySerializer,
+    CorsEventSerializer,
+    CRUDEventSerializer,
+    DatabaseConfigSerializer,
+    LoginEventSerializer,
+    RequestEventSerializer,
+    RetentionPolicySerializer,
+    SystemEventSerializer,
 )
 from activitylog.models import (
-    CorsEvent, CRUDEvent, DatabaseConfig, LoginEvent,
-    RequestEvent, RetentionPolicy, SystemEvent,
+    CorsEvent,
+    CRUDEvent,
+    DatabaseConfig,
+    LoginEvent,
+    RequestEvent,
+    RetentionPolicy,
+    SystemEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -390,9 +405,7 @@ class ActivitySSEView(APIView):
     def get(self, request):
         def event_stream():
             try:
-                import asyncio
                 from channels.layers import get_channel_layer
-                from asgiref.sync import async_to_sync
 
                 layer = get_channel_layer()
                 if layer is None:

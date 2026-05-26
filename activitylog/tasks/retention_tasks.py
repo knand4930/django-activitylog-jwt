@@ -79,9 +79,8 @@ def _apply_policy(policy) -> int:
         try:
             model = _get_model(dotted)
             qs = model.objects.filter(datetime__lt=cutoff)
-            if policy.tenant_id:
-                if hasattr(model, "user"):
-                    qs = qs.filter(user__profile__tenant_id=policy.tenant_id)
+            if policy.tenant_id and hasattr(model, "user"):
+                qs = qs.filter(user__profile__tenant_id=policy.tenant_id)
             deleted, _ = qs.delete()
             total += deleted
         except Exception as exc:
@@ -106,7 +105,7 @@ def cleanup_old_logs(event_type: str = "all", days: int = 90) -> int:
 @shared_task(name="activitylog.recompute_integrity_hashes")
 def recompute_integrity_hashes() -> dict:
     """Batch-recompute missing integrity hashes (e.g. after upgrade)."""
-    from activitylog.models import CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent
+    from activitylog.models import CorsEvent, CRUDEvent, LoginEvent, RequestEvent, SystemEvent
 
     results = {}
     for model in (CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent):

@@ -8,7 +8,7 @@ a direct synchronous save on the same thread.
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def _stamp_and_save(obj) -> None:
 # ---------------------------------------------------------------------------
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=5, name="activitylog.save_crud_event")
-def save_crud_event(self, data: Dict[str, Any]) -> None:
+def save_crud_event(self, data: dict[str, Any]) -> None:
     try:
         from activitylog.models import CRUDEvent
         event = CRUDEvent(**data)
@@ -70,7 +70,7 @@ def save_crud_event(self, data: Dict[str, Any]) -> None:
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=5, name="activitylog.save_login_event")
-def save_login_event(self, data: Dict[str, Any]) -> None:
+def save_login_event(self, data: dict[str, Any]) -> None:
     try:
         from activitylog.models import LoginEvent
         event = LoginEvent(**data)
@@ -85,7 +85,7 @@ def save_login_event(self, data: Dict[str, Any]) -> None:
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=5, name="activitylog.save_request_event")
-def save_request_event(self, data: Dict[str, Any]) -> None:
+def save_request_event(self, data: dict[str, Any]) -> None:
     try:
         from activitylog.models import RequestEvent
         event = RequestEvent(**data)
@@ -100,7 +100,7 @@ def save_request_event(self, data: Dict[str, Any]) -> None:
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=5, name="activitylog.save_cors_event")
-def save_cors_event(self, data: Dict[str, Any]) -> None:
+def save_cors_event(self, data: dict[str, Any]) -> None:
     try:
         from activitylog.models import CorsEvent
         event = CorsEvent(**data)
@@ -115,7 +115,7 @@ def save_cors_event(self, data: Dict[str, Any]) -> None:
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=5, name="activitylog.save_system_event")
-def save_system_event(self, data: Dict[str, Any]) -> None:
+def save_system_event(self, data: dict[str, Any]) -> None:
     try:
         from activitylog.models import SystemEvent
         event = SystemEvent(**data)
@@ -165,7 +165,7 @@ _TASK_MAP = {
 }
 
 
-def dispatch_log_task(event_type: str, data: Dict[str, Any], queue: Optional[str] = None) -> None:
+def dispatch_log_task(event_type: str, data: dict[str, Any], queue: str | None = None) -> None:
     """Send a log-write task to Celery or run it synchronously as a fallback.
 
     :param event_type: One of ``"crud"``, ``"login"``, ``"request"``, ``"cors"``, ``"system"``.
@@ -179,7 +179,7 @@ def dispatch_log_task(event_type: str, data: Dict[str, Any], queue: Optional[str
 
     use_async = _CELERY_AVAILABLE and _celery_is_configured()
     if use_async:
-        kwargs: Dict[str, Any] = {"args": [data]}
+        kwargs: dict[str, Any] = {"args": [data]}
         if queue:
             kwargs["queue"] = queue
         task.apply_async(**kwargs)
@@ -200,14 +200,14 @@ def _celery_is_configured() -> bool:
 # Real-time broadcast (WebSocket/SSE channel layer)
 # ---------------------------------------------------------------------------
 
-def _broadcast_event(event_type: str, event_id: str, data: Dict[str, Any]) -> None:
+def _broadcast_event(event_type: str, event_id: str, data: dict[str, Any]) -> None:
     """Publish a new-event notification to the channel layer if available."""
     try:
         from django.conf import settings
         if not getattr(settings, "ACTIVITYLOG_REALTIME_ENABLED", False):
             return
-        from channels.layers import get_channel_layer
         from asgiref.sync import async_to_sync
+        from channels.layers import get_channel_layer
         layer = get_channel_layer()
         if layer is None:
             return

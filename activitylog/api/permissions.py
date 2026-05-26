@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from rest_framework.permissions import BasePermission, IsAdminUser
+from rest_framework.permissions import BasePermission
 
 
 class IsActivityLogAdmin(BasePermission):

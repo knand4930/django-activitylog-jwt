@@ -8,7 +8,6 @@ ship.
 from __future__ import annotations
 
 import sys
-from typing import Tuple
 
 import django
 
@@ -16,8 +15,8 @@ import django
 # Version tuples
 # ---------------------------------------------------------------------------
 
-DJANGO_VERSION: Tuple[int, ...] = django.VERSION[:3]
-PYTHON_VERSION: Tuple[int, ...] = sys.version_info[:3]
+DJANGO_VERSION: tuple[int, ...] = django.VERSION[:3]
+PYTHON_VERSION: tuple[int, ...] = sys.version_info[:3]
 
 # Major feature flags — extend as Django 6+ ships
 DJANGO_4 = DJANGO_VERSION >= (4, 0)

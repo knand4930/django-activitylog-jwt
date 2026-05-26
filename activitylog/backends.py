@@ -17,7 +17,7 @@ MongoBackend     — writes to MongoDB via pymongo (optional dep)
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -29,19 +29,19 @@ logger = logging.getLogger(__name__)
 class BaseBackend:
     """Interface that all backends must implement."""
 
-    def crud(self, data: Dict[str, Any]) -> Any:
+    def crud(self, data: dict[str, Any]) -> Any:
         raise NotImplementedError
 
-    def login(self, data: Dict[str, Any]) -> Any:
+    def login(self, data: dict[str, Any]) -> Any:
         raise NotImplementedError
 
-    def request(self, data: Dict[str, Any]) -> Any:
+    def request(self, data: dict[str, Any]) -> Any:
         raise NotImplementedError
 
-    def cors(self, data: Dict[str, Any]) -> Any:
+    def cors(self, data: dict[str, Any]) -> Any:
         raise NotImplementedError
 
-    def system(self, data: Dict[str, Any]) -> Any:
+    def system(self, data: dict[str, Any]) -> Any:
         raise NotImplementedError
 
 
@@ -56,31 +56,31 @@ class ModelBackend(BaseBackend):
         obj.integrity_hash = obj.compute_integrity_hash()
         obj.save(update_fields=["integrity_hash"])
 
-    def crud(self, data: Dict[str, Any]):
+    def crud(self, data: dict[str, Any]):
         from activitylog.models import CRUDEvent
         obj = CRUDEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
-    def login(self, data: Dict[str, Any]):
+    def login(self, data: dict[str, Any]):
         from activitylog.models import LoginEvent
         obj = LoginEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
-    def request(self, data: Dict[str, Any]):
+    def request(self, data: dict[str, Any]):
         from activitylog.models import RequestEvent
         obj = RequestEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
-    def cors(self, data: Dict[str, Any]):
+    def cors(self, data: dict[str, Any]):
         from activitylog.models import CorsEvent
         obj = CorsEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
-    def system(self, data: Dict[str, Any]):
+    def system(self, data: dict[str, Any]):
         from activitylog.models import SystemEvent
         obj = SystemEvent.objects.create(**data)
         self._stamp(obj)
@@ -94,23 +94,23 @@ class ModelBackend(BaseBackend):
 class AsyncBackend(BaseBackend):
     """Dispatch writes to Celery tasks.  Falls back to synchronous on missing broker."""
 
-    def _dispatch(self, event_type: str, data: Dict[str, Any]) -> None:
+    def _dispatch(self, event_type: str, data: dict[str, Any]) -> None:
         from activitylog.tasks.log_tasks import dispatch_log_task
         dispatch_log_task(event_type, data)
 
-    def crud(self, data: Dict[str, Any]) -> None:
+    def crud(self, data: dict[str, Any]) -> None:
         self._dispatch("crud", data)
 
-    def login(self, data: Dict[str, Any]) -> None:
+    def login(self, data: dict[str, Any]) -> None:
         self._dispatch("login", data)
 
-    def request(self, data: Dict[str, Any]) -> None:
+    def request(self, data: dict[str, Any]) -> None:
         self._dispatch("request", data)
 
-    def cors(self, data: Dict[str, Any]) -> None:
+    def cors(self, data: dict[str, Any]) -> None:
         self._dispatch("cors", data)
 
-    def system(self, data: Dict[str, Any]) -> None:
+    def system(self, data: dict[str, Any]) -> None:
         self._dispatch("system", data)
 
 
@@ -133,12 +133,12 @@ class MultiBackend(BaseBackend):
         from django.conf import settings
         from django.utils.module_loading import import_string
 
-        backend_paths: List[str] = getattr(
+        backend_paths: list[str] = getattr(
             settings, "DJANGO_ACTIVITY_LOG_MULTI_BACKENDS", []
         )
-        self._backends: List[BaseBackend] = [import_string(p)() for p in backend_paths]
+        self._backends: list[BaseBackend] = [import_string(p)() for p in backend_paths]
 
-    def _fan_out(self, method: str, data: Dict[str, Any]) -> None:
+    def _fan_out(self, method: str, data: dict[str, Any]) -> None:
         for backend in self._backends:
             try:
                 getattr(backend, method)(data)
@@ -210,8 +210,7 @@ class ClickHouseBackend(BaseBackend):
             )
         return self._CLIENT
 
-    def _insert(self, table: str, data: Dict[str, Any]) -> None:
-        import json as _json
+    def _insert(self, table: str, data: dict[str, Any]) -> None:
         client = self._get_client()
         clean = {k: (str(v) if not isinstance(v, (int, float, str, type(None))) else v)
                  for k, v in data.items()}
@@ -275,8 +274,7 @@ class MongoBackend(BaseBackend):
             self.__class__._DB = client[cfg.get("database", "activitylog")]
         return self._DB
 
-    def _insert(self, collection: str, data: Dict[str, Any]) -> None:
-        import json as _json
+    def _insert(self, collection: str, data: dict[str, Any]) -> None:
         db = self._get_db()
         doc = {k: (str(v) if not isinstance(v, (int, float, str, bool, type(None), dict, list)) else v)
                for k, v in data.items()}
@@ -326,8 +324,8 @@ class ScyllaDBBackend(BaseBackend):
         if self._SESSION is None:
             from django.conf import settings
             try:
-                from cassandra.cluster import Cluster
                 from cassandra.auth import PlainTextAuthProvider
+                from cassandra.cluster import Cluster
             except ImportError as exc:
                 raise RuntimeError(
                     "cassandra-driver is required for ScyllaDBBackend. "
@@ -348,7 +346,7 @@ class ScyllaDBBackend(BaseBackend):
             self.__class__._SESSION = session
         return self._SESSION
 
-    def _insert(self, table: str, data: Dict[str, Any]) -> None:
+    def _insert(self, table: str, data: dict[str, Any]) -> None:
         session = self._get_session()
         cols = ", ".join(data.keys())
         placeholders = ", ".join(["%s"] * len(data))

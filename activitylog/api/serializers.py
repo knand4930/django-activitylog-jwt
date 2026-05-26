@@ -5,10 +5,14 @@ from __future__ import annotations
 from rest_framework import serializers
 
 from activitylog.models import (
-    CorsEvent, CRUDEvent, DatabaseConfig, LoginEvent, RequestEvent,
-    RetentionPolicy, SystemEvent,
+    CorsEvent,
+    CRUDEvent,
+    DatabaseConfig,
+    LoginEvent,
+    RequestEvent,
+    RetentionPolicy,
+    SystemEvent,
 )
-
 
 # ---------------------------------------------------------------------------
 # Shared geo mixin

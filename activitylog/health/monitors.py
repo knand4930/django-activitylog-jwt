@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.utils import timezone
 
@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 class DatabaseHealthMonitor:
     """Check the health of configured database connections."""
 
-    def check_all(self) -> Dict[str, Any]:
+    def check_all(self) -> dict[str, Any]:
         from activitylog.models import DatabaseConfig
         results = {}
         for cfg in DatabaseConfig.objects.filter(is_active=True):
             results[str(cfg.id)] = self.check_single(cfg)
         return results
 
-    def check_single(self, cfg, save: bool = True) -> Dict[str, Any]:
+    def check_single(self, cfg, save: bool = True) -> dict[str, Any]:
         """Run a health check for one DatabaseConfig.
 
         :param cfg: A DatabaseConfig instance.
@@ -28,7 +28,7 @@ class DatabaseHealthMonitor:
         """
         from activitylog.models import DatabaseConfig
 
-        result: Dict[str, Any] = {
+        result: dict[str, Any] = {
             "id": str(cfg.id),
             "name": cfg.name,
             "engine": cfg.engine,

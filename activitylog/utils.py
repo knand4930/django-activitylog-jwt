@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -36,7 +36,7 @@ def get_field_value(obj, field) -> Any:
     return value
 
 
-def model_delta(old_model, new_model) -> Optional[Dict[str, Any]]:
+def model_delta(old_model, new_model) -> dict[str, Any] | None:
     delta = {}
     for field in new_model._meta.fields:
         old_val = get_field_value(old_model, field)
@@ -46,7 +46,7 @@ def model_delta(old_model, new_model) -> Optional[Dict[str, Any]]:
     return delta or None
 
 
-def get_m2m_field_name(model, instance) -> Optional[str]:
+def get_m2m_field_name(model, instance) -> str | None:
     for x in model._meta.related_objects:
         if x.related_model().__class__ == instance.__class__:
             return x.remote_field.name
@@ -79,9 +79,9 @@ def _get_geo_reader():
     return _GEO_READER
 
 
-def get_geo_data(ip: Optional[str]) -> Dict[str, Optional[str]]:
+def get_geo_data(ip: str | None) -> dict[str, str | None]:
     """Return a dict with latitude, longitude, city, country, country_code for an IP."""
-    empty: Dict[str, Optional[str]] = {
+    empty: dict[str, str | None] = {
         "latitude": None,
         "longitude": None,
         "city": None,

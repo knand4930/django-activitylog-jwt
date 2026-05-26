@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import threading
-from typing import TYPE_CHECKING, Dict, FrozenSet, Optional
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from activitylog.models import DatabaseConfig
@@ -15,7 +16,7 @@ _lock = threading.RLock()
 _registered_aliases: set = set()
 
 
-def register_database(alias: str, config: Dict[str, object]) -> bool:
+def register_database(alias: str, config: dict[str, object]) -> bool:
     """Register a dynamic database alias in Django's connection handler.
 
     :param alias: A unique alias string (e.g. ``"activitylog_clickhouse"``).
@@ -45,10 +46,8 @@ def unregister_database(alias: str) -> None:
     with _lock:
         if alias not in _registered_aliases:
             return
-        try:
+        with contextlib.suppress(Exception):
             connections[alias].close()
-        except Exception:
-            pass
         databases = settings.DATABASES.copy()
         databases.pop(alias, None)
         settings.DATABASES = databases
@@ -56,7 +55,7 @@ def unregister_database(alias: str) -> None:
         logger.info("ActivityLog: unregistered database alias '%s'", alias)
 
 
-def get_registered_aliases() -> FrozenSet[str]:
+def get_registered_aliases() -> frozenset[str]:
     return frozenset(_registered_aliases)
 
 
@@ -64,7 +63,7 @@ def alias_for_config(config_id: str) -> str:
     return f"activitylog_{config_id}"
 
 
-def ensure_config_registered(db_config: "DatabaseConfig") -> Optional[str]:
+def ensure_config_registered(db_config: DatabaseConfig) -> str | None:
     """Given a DatabaseConfig ORM object, ensure it is registered and return its alias."""
     from django.db import connections
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import logging
 
 from django.contrib.auth import signals
@@ -76,9 +75,10 @@ def user_logged_out(sender, request, user, **kwargs) -> None:  # noqa: ARG001
 
 
 def user_login_failed(sender, credentials, **kwargs) -> None:  # noqa: ARG001
+    from django.contrib.auth import get_user_model
+
     from activitylog.models import LoginEvent
     from activitylog.tasks.log_tasks import dispatch_log_task
-    from django.contrib.auth import get_user_model
 
     request = set_local_details()
     if request is None:

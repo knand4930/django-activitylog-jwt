@@ -13,8 +13,13 @@ except ImportError:
 
 if _FILTER_AVAILABLE:
     from activitylog.models import (
-        CRUDEvent, CorsEvent, DatabaseConfig, LoginEvent,
-        RequestEvent, RetentionPolicy, SystemEvent,
+        CorsEvent,
+        CRUDEvent,
+        DatabaseConfig,
+        LoginEvent,
+        RequestEvent,
+        RetentionPolicy,
+        SystemEvent,
     )
 
     class DateRangeFilter(django_filters.FilterSet):

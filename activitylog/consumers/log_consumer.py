@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +67,8 @@ try:
 
         async def receive(
             self,
-            text_data: Optional[str] = None,
-            bytes_data: Optional[bytes] = None,  # noqa: ARG002
+            text_data: str | None = None,
+            bytes_data: bytes | None = None,  # noqa: ARG002
         ) -> None:
             try:
                 payload = json.loads(text_data or "{}")
@@ -76,7 +76,7 @@ try:
             except Exception:
                 pass
 
-        async def log_event(self, event: Dict[str, Any]) -> None:
+        async def log_event(self, event: dict[str, Any]) -> None:
             """Receive a channel-layer group broadcast and relay to WebSocket."""
             await self.send(text_data=json.dumps({
                 "type": event.get("event_type"),

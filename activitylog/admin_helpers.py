@@ -1,4 +1,5 @@
 import json
+
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
@@ -8,6 +9,7 @@ from django.urls import re_path, reverse
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+
 from .settings import READONLY_EVENTS, TRUNCATE_TABLE_SQL_STATEMENT
 
 
@@ -114,11 +116,11 @@ class ActivityLogModelAdmin(admin.ModelAdmin):
                     n = modeladmin.model.objects.count()
                     truncate_table(modeladmin.model)
                     modeladmin.message_user(
-                        request, _("Successfully removed %d rows" % n), messages.SUCCESS
+                        request, _("Successfully removed {:d} rows").format(n), messages.SUCCESS
                     )
                 except Exception as e:
                     modeladmin.message_user(
-                        request, _("ERROR") + ": %r" % e, messages.ERROR
+                        request, f"{_('ERROR')}: {e!r}", messages.ERROR
                     )
             else:
                 modeladmin.message_user(
