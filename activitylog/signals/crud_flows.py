@@ -70,6 +70,7 @@ def _build_event_data(event_type: int, instance, object_json_repr, **extra) -> d
 
 def _dispatch(event_type: int, instance, object_json_repr, **extra) -> None:
     from activitylog.tasks.log_tasks import dispatch_log_task
+
     data = _build_event_data(event_type, instance, object_json_repr, **extra)
     dispatch_log_task("crud", data)
 
@@ -78,7 +79,9 @@ def _handle_exception(instance, signal_name: str) -> None:
     with __import__("contextlib").suppress(Exception):
         logger.exception(
             "CRUDEvent creation failed in %s for %s (pk=%s)",
-            signal_name, type(instance).__name__, instance.pk,
+            signal_name,
+            type(instance).__name__,
+            instance.pk,
         )
     if should_propagate_exceptions():
         raise

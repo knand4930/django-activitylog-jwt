@@ -2,10 +2,12 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/django-activitylog-jwt)](https://pypi.org/project/django-activitylog-jwt/)
 [![Python](https://img.shields.io/pypi/pyversions/django-activitylog-jwt)](https://pypi.org/project/django-activitylog-jwt/)
-[![Django](https://img.shields.io/badge/django-4.2%20%E2%80%93%206.x-green)](https://www.djangoproject.com/)
+[![Django](https://img.shields.io/badge/django-4.x%20%E2%80%93%206.x-green)](https://www.djangoproject.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 Production-ready activity logging for Django. Tracks model CRUD events, authentication events, HTTP requests, and CORS requests with SHA-256 tamper-proof integrity hashing, async Celery processing, multi-database routing, DRF REST APIs, real-time WebSocket/SSE streaming, and per-tenant retention policies.
+
+Use it as a drop-in audit trail for an existing Django website, a JWT-powered API, or a high-traffic SaaS app. Start with the default ORM backend for local development, then switch to Celery and a dedicated log database when traffic grows.
 
 ---
 
@@ -14,6 +16,7 @@ Production-ready activity logging for Django. Tracks model CRUD events, authenti
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Copy-Paste Integration Recipes](#copy-paste-integration-recipes)
 - [Complete Configuration Reference](#complete-configuration-reference)
 - [JWT Integration](#jwt-integration)
   - [HS256 (default)](#hs256-default)
@@ -26,6 +29,7 @@ Production-ready activity logging for Django. Tracks model CRUD events, authenti
 - [CORS Tracking](#cors-tracking)
 - [Multi-Database Support](#multi-database-support)
 - [Async Processing with Celery](#async-processing-with-celery)
+- [High-Load Production Setup](#high-load-production-setup)
 - [Real-Time Streaming](#real-time-streaming)
 - [Retention Policies](#retention-policies)
 - [Integrity Verification](#integrity-verification)
@@ -44,10 +48,14 @@ Production-ready activity logging for Django. Tracks model CRUD events, authenti
 
 | Package | Version | Notes |
 |---|---|---|
-| Python | ≥ 3.10 | 3.10, 3.11, 3.12, 3.13 tested |
-| Django | ≥ 4.2 | 4.2 LTS through 6.x |
+| Python | ≥ 3.8 | 3.8 through 3.14+ supported |
+| Django | ≥ 4.0,<7.0 | Django 4.x through 6.x; pip selects versions compatible with your Python |
 | djangorestframework | ≥ 3.14 | Required for REST API endpoints |
 | geoip2 | ≥ 4.8 | Geo-IP city lookups |
+
+Python 3.7 is not advertised because Django 4.x and newer do not support it. If
+your project is still on Python 3.7, upgrade Python first or remain on a
+Django 3.2-era package line.
 
 ---
 
@@ -75,6 +83,14 @@ pip install "django-activitylog-jwt[all]"
 
 See the [Optional Dependencies](#optional-dependencies) section for the full list.
 
+Recommended production install for most websites:
+
+```bash
+pip install "django-activitylog-jwt[jwt,filters,celery,encryption]"
+```
+
+Use `all` only when you actually need every backend driver. Keeping extras focused makes deployments smaller and faster to build.
+
 ---
 
 ## Quick Start
@@ -96,6 +112,8 @@ INSTALLED_APPS = [
     "rest_framework",
 ]
 ```
+
+Keep `rest_framework` if you want the built-in API. If you only want model, auth, and request logging in Django admin, `activitylog` is the only package app you must add.
 
 ### 2. Add middleware — must be first
 
@@ -120,6 +138,12 @@ Placing `ActivityLogMiddleware` first allows it to measure response time and cap
 python manage.py migrate activitylog
 ```
 
+If you route logs to a separate database alias, migrate that alias too:
+
+```bash
+python manage.py migrate activitylog --database=logs
+```
+
 ### 4. Mount API URLs (optional)
 
 ```python
@@ -135,7 +159,132 @@ urlpatterns = [
 
 ### 5. Done
 
-Zero configuration is required. The package logs model changes, auth events, and HTTP requests out of the box with SQLite and synchronous writes. Add `ACTIVITYLOG = {...}` to your settings only when you need to override defaults.
+Zero configuration is required. The package logs model changes, auth events, and HTTP requests out of the box with your default database. Add `ACTIVITYLOG = {...}` to your settings only when you need to override defaults.
+
+Open Django admin and look for the activity log models, or call the REST API if you mounted the URLs. For production, continue with the recipes below.
+
+---
+
+## Copy-Paste Integration Recipes
+
+### Existing Django website
+
+Use this when you want immediate audit logs in Django admin with the fewest moving parts:
+
+```python
+# settings.py
+INSTALLED_APPS += [
+    "activitylog",
+    "rest_framework",  # optional, only needed for the REST API
+]
+
+MIDDLEWARE = [
+    "activitylog.middleware.middleware.ActivityLogMiddleware",
+    *MIDDLEWARE,
+]
+
+ACTIVITYLOG = {
+    "WATCH_MODEL_EVENTS": True,
+    "WATCH_AUTH_EVENTS": True,
+    "WATCH_REQUEST_EVENTS": True,
+    "WATCH_CORS_EVENTS": False,
+    "LOGGING_BACKEND": "activitylog.backends.ModelBackend",
+    "UNREGISTERED_URLS_EXTRA": [
+        r"^/static/",
+        r"^/media/",
+        r"^/health/",
+    ],
+}
+```
+
+Then run:
+
+```bash
+python manage.py migrate activitylog
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+### JWT API with SimpleJWT
+
+Use this for REST APIs where users authenticate with `Authorization: Bearer <token>`:
+
+```bash
+pip install "django-activitylog-jwt[jwt,filters]"
+```
+
+```python
+# settings.py
+INSTALLED_APPS += [
+    "rest_framework",
+    "activitylog",
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+}
+
+ACTIVITYLOG = {
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+    "JWT_VERIFY_SIGNATURE": False,
+    "REGISTERED_URLS": [
+        r"^/api/",
+    ],
+    "UNREGISTERED_URLS_EXTRA": [
+        r"^/api/health/",
+        r"^/api/schema/",
+    ],
+}
+```
+
+### SaaS or busy production app
+
+Use this when request volume is high and log writes must not slow down normal pages:
+
+```bash
+pip install "django-activitylog-jwt[jwt,filters,celery,encryption]"
+```
+
+```python
+# settings.py
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "app",
+    },
+    "logs": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "activity_logs",
+    },
+}
+
+ACTIVITYLOG = {
+    "ASYNC_ENABLED": True,
+    "LOGGING_BACKEND": "activitylog.backends.AsyncBackend",
+    "DATABASE_ALIAS": "logs",
+    "USER_DB_CONSTRAINT": False,
+    "CHECK_IF_REQUEST_USER_EXISTS": False,
+    "CRUD_EVENT_NO_CHANGED_FIELDS_SKIP": True,
+    "DEFAULT_RETENTION_DAYS": 90,
+    "UNREGISTERED_URLS_EXTRA": [
+        r"^/static/",
+        r"^/media/",
+        r"^/health/",
+        r"^/metrics/",
+        r"^/admin/jsi18n/",
+    ],
+}
+```
+
+```bash
+python manage.py migrate activitylog --database=logs
+celery -A myproject worker --loglevel=info
+celery -A myproject beat --loglevel=info
+```
+
+For very large analytics workloads, keep the ORM backend for admin/audit lookup and fan out to ClickHouse for reporting. See [Fan-out to multiple backends simultaneously](#fan-out-to-multiple-backends-simultaneously).
 
 ---
 
@@ -873,6 +1022,93 @@ celery -A myproject beat   --loglevel=info
 
 ---
 
+## High-Load Production Setup
+
+For high-traffic sites, the goal is simple: keep audit writes off the request path, keep log tables away from your transactional app tables, and avoid logging endpoints that create noise without business value.
+
+### Recommended architecture
+
+| Concern | Recommendation |
+|---|---|
+| Request latency | Use `AsyncBackend` with Celery workers |
+| Database load | Store logs in a dedicated `logs` database alias |
+| User foreign keys | Set `USER_DB_CONSTRAINT=False` when logs live outside the main DB |
+| Noisy traffic | Exclude static files, health checks, metrics, schema, and admin JS endpoints |
+| Long-term growth | Set retention rules or `DEFAULT_RETENTION_DAYS` |
+| Analytics at scale | Use `MultiBackend` to keep ORM audit logs and send a copy to ClickHouse |
+| Admin purge speed | Configure `TRUNCATE_TABLE_SQL_STATEMENT` for trusted admin-only purge actions |
+
+### Production settings template
+
+```python
+# settings.py
+ACTIVITYLOG = {
+    # Keep request/response handling fast.
+    "ASYNC_ENABLED": True,
+    "LOGGING_BACKEND": "activitylog.backends.AsyncBackend",
+
+    # Store activity logs away from application tables.
+    "DATABASE_ALIAS": "logs",
+    "USER_DB_CONSTRAINT": False,
+    "CHECK_IF_REQUEST_USER_EXISTS": False,
+
+    # Reduce duplicate update noise.
+    "CRUD_EVENT_NO_CHANGED_FIELDS_SKIP": True,
+
+    # Do not spend storage or worker time on low-value endpoints.
+    "UNREGISTERED_URLS_EXTRA": [
+        r"^/static/",
+        r"^/media/",
+        r"^/favicon\.ico$",
+        r"^/health/",
+        r"^/ready/",
+        r"^/live/",
+        r"^/metrics/",
+        r"^/api/schema/",
+        r"^/admin/jsi18n/",
+    ],
+
+    # Keep data only as long as your compliance or product needs require.
+    "DEFAULT_RETENTION_DAYS": 90,
+
+    # Optional: fast purge action for PostgreSQL.
+    "TRUNCATE_TABLE_SQL_STATEMENT": 'TRUNCATE TABLE "{db_table}" RESTART IDENTITY CASCADE',
+}
+```
+
+### Worker sizing
+
+Start with one Celery worker process for low to moderate traffic, then scale horizontally:
+
+```bash
+celery -A myproject worker --loglevel=info --concurrency=4
+celery -A myproject beat --loglevel=info
+```
+
+Increase concurrency only after checking database write capacity. If the log database becomes the bottleneck, add retention, exclude more noisy URLs, or move high-volume analytics events to ClickHouse.
+
+### Backend choice by load
+
+| Traffic pattern | Best backend |
+|---|---|
+| Local development or small admin site | `ModelBackend` |
+| Normal production website | `AsyncBackend` |
+| Production website with separate log database | `AsyncBackend` + `DATABASE_ALIAS="logs"` |
+| Heavy reporting and analytics | `MultiBackend` with `ModelBackend` + `ClickHouseBackend` |
+| Event archive outside SQL | `MongoBackend` or `ScyllaDBBackend` |
+
+### Deployment checklist
+
+- Put `ActivityLogMiddleware` first in `MIDDLEWARE`.
+- Run `python manage.py migrate activitylog --database=logs` when using a dedicated log DB.
+- Start both Celery worker and Celery Beat.
+- Exclude health checks, metrics, static files, and schema endpoints.
+- Add `RetentionPolicy` records for tables that can grow quickly.
+- Keep `JWT_VERIFY_SIGNATURE=False` unless you specifically need re-verification during logging.
+- Monitor queue depth, worker errors, and database write latency after enabling request logging.
+
+---
+
 ## Real-Time Streaming
 
 ### Server-Sent Events (SSE)
@@ -1107,7 +1343,7 @@ user.user_permissions.add(perm)
 | Extra | Packages installed | Use case |
 |---|---|---|
 | `celery` | `celery>=5.3.0` | Async log writes |
-| `jwt` | `djangorestframework-simplejwt>=5.3.0` | JWT auth (recommended) |
+| `jwt` | `djangorestframework-simplejwt>=5.5.1,<6.0` on Python ≥3.9; newest compatible 5.3.x line on Python 3.8 | JWT auth (recommended) |
 | `filters` | `django-filter>=23.0` | Field-level API filtering |
 | `websocket` | `channels>=4.0.0`, `channels-redis>=4.1.0` | WebSocket real-time stream |
 | `clickhouse` | `clickhouse-driver>=0.2.7` | ClickHouse backend |

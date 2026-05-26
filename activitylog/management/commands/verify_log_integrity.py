@@ -8,11 +8,14 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--fix", action="store_true",
+            "--fix",
+            action="store_true",
             help="Recompute and save hashes for records that fail verification.",
         )
         parser.add_argument(
-            "--model", dest="model_name", default=None,
+            "--model",
+            dest="model_name",
+            default=None,
             choices=["CRUDEvent", "LoginEvent", "RequestEvent", "CorsEvent", "SystemEvent"],
             help="Limit verification to a single model.",
         )
@@ -51,11 +54,7 @@ class Command(BaseCommand):
                     )
                 )
             else:
-                self.stdout.write(
-                    self.style.SUCCESS(f"{name}: {info['total']} records OK")
-                )
+                self.stdout.write(self.style.SUCCESS(f"{name}: {info['total']} records OK"))
 
         if any_tampered and not fix:
-            self.stdout.write(
-                self.style.WARNING("Run with --fix to recompute integrity hashes.")
-            )
+            self.stdout.write(self.style.WARNING("Run with --fix to recompute integrity hashes."))

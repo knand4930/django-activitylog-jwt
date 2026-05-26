@@ -49,9 +49,7 @@ def _resolve_user_from_request(cookie_string, authorization_header: str):
         session_name = settings.SESSION_COOKIE_NAME
         if session_name in cookie:
             try:
-                session = session_engine.SessionStore(
-                    session_key=cookie[session_name].value
-                ).load()
+                session = session_engine.SessionStore(session_key=cookie[session_name].value).load()
                 if AUTH_SESSION_KEY in session:
                     return User.objects.get(pk=session[AUTH_SESSION_KEY])
             except Exception:
@@ -73,6 +71,7 @@ def _resolve_user_from_request(cookie_string, authorization_header: str):
 def _decode_jwt(token: str) -> str | None:
     """Return user_id claim from a JWT token (HS256 and RS256 both supported)."""
     from activitylog.compat import get_user_id_from_jwt
+
     return get_user_id_from_jwt(token)
 
 
@@ -119,18 +118,21 @@ def cors_started_handler(sender, **kwargs) -> None:  # noqa: ARG001
     user = _resolve_user_from_request(cookie_string, authorization)
     geo = get_geo_data(remote_ip)
 
-    dispatch_log_task("cors", {
-        "url": frontend_url[:2048],
-        "method": method,
-        "query_string": str(query_string)[:4096] if query_string else "",
-        "user_id": getattr(user, "id", None),
-        "remote_ip": remote_ip,
-        "browser": browser,
-        "platform": platform,
-        "operating_system": operating_system,
-        "origin": environ.get("HTTP_ORIGIN") if environ else None,
-        **geo,
-    })
+    dispatch_log_task(
+        "cors",
+        {
+            "url": frontend_url[:2048],
+            "method": method,
+            "query_string": str(query_string)[:4096] if query_string else "",
+            "user_id": getattr(user, "id", None),
+            "remote_ip": remote_ip,
+            "browser": browser,
+            "platform": platform,
+            "operating_system": operating_system,
+            "origin": environ.get("HTTP_ORIGIN") if environ else None,
+            **geo,
+        },
+    )
 
 
 if WATCH_CORS_EVENTS:

@@ -13,7 +13,7 @@ Production-ready Django activity logging: async Celery processing, \
 multi-database support (PostgreSQL, ClickHouse, MongoDB, ScyllaDB, MySQL), \
 DRF REST APIs, real-time WebSocket/SSE streaming, RBAC, retention policies, \
 SHA-256 tamper-proof integrity hashing, and JWT authentication. \
-Supports Django 4.x – 6.x and Python 3.10 – 3.13+.\
+Supports Django 4.x – 6.x and Python 3.8 – 3.14+.\
 """
 readme = "readME.md"
 license = { text = "MIT" }
@@ -26,18 +26,24 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Framework :: Django",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 4.1",
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.1",
     "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Internet :: Log Analysis",
     "Topic :: System :: Logging",
     "Topic :: Security",
@@ -45,11 +51,11 @@ classifiers = [
 ]
 
 # Minimum supported versions
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 
 # Core dependencies — always installed
 dependencies = [
-    "Django>=4.2",
+    "Django>=4.0,<7.0",
     "djangorestframework>=3.14.0",
     "geoip2>=4.8.0",
 ]
@@ -62,8 +68,13 @@ dependencies = [
 # Async log processing via Celery
 celery = ["celery>=5.3.0"]
 
-# JWT — simplejwt is the maintained library; legacy jwt also accepted at runtime
-jwt = ["djangorestframework-simplejwt>=5.3.0"]
+# JWT — simplejwt is the maintained library; legacy jwt also accepted at runtime.
+# Python 3.8 users receive the newest compatible simplejwt line; Python 3.9+
+# users receive the current simplejwt 5.5+ line.
+jwt = [
+    "djangorestframework-simplejwt>=5.3.1,<5.5; python_version < '3.9'",
+    "djangorestframework-simplejwt>=5.5.1,<6.0; python_version >= '3.9'",
+]
 
 # Filtering / searching in the DRF API
 filters = ["django-filter>=23.0"]
@@ -104,7 +115,8 @@ dev = [
 # Convenience: everything
 all = [
     "celery>=5.3.0",
-    "djangorestframework-simplejwt>=5.3.0",
+    "djangorestframework-simplejwt>=5.3.1,<5.5; python_version < '3.9'",
+    "djangorestframework-simplejwt>=5.5.1,<6.0; python_version >= '3.9'",
     "django-filter>=23.0",
     "channels>=4.0.0",
     "channels-redis>=4.1.0",
@@ -167,7 +179,7 @@ exclude_lines = [
 # ---------------------------------------------------------------------------
 [tool.ruff]
 line-length    = 100
-target-version = "py310"
+target-version = "py38"
 src            = ["activitylog"]
 
 [tool.ruff.lint]
@@ -185,7 +197,7 @@ ignore = [
 # Mypy
 # ---------------------------------------------------------------------------
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.8"
 plugins        = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 strict         = false
 ignore_missing_imports = true

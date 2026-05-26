@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 try:
     from celery import shared_task
 except ImportError:
+
     def shared_task(fn=None, **_):  # type: ignore[misc]
         if fn is None:
             return shared_task
@@ -32,6 +33,7 @@ _EVENT_MODEL_MAP = {
 
 def _get_model(dotted: str):
     from django.apps import apps
+
     app_label, model_name = dotted.split(".")
     return apps.get_model(app_label, model_name)
 
@@ -96,6 +98,7 @@ def cleanup_old_logs(event_type: str = "all", days: int = 90) -> int:
     Useful for ad-hoc management or as a fallback when no policies exist.
     """
     from activitylog.models import RetentionPolicy
+
     tmp = RetentionPolicy(name="_adhoc", event_type=event_type, retain_days=days)
     count = _apply_policy(tmp)
     logger.info("cleanup_old_logs(%s, %d days): deleted %d records", event_type, days, count)

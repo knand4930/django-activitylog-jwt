@@ -10,9 +10,7 @@ class ModelActivityMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        _thread_locals.request = (
-            request
-        )
+        _thread_locals.request = request
         if hasattr(self, "process_request"):
             response = self.process_request(request)
         response = response or self.get_response(request)

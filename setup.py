@@ -22,9 +22,13 @@ setup(
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Framework :: Django",
@@ -32,15 +36,18 @@ setup(
         "Framework :: Django :: 4.1",
         "Framework :: Django :: 4.2",
         "Framework :: Django :: 5.0",
+        "Framework :: Django :: 5.1",
+        "Framework :: Django :: 5.2",
+        "Framework :: Django :: 6.0",
         "Topic :: System :: Logging",
         "Topic :: Security",
     ],
-    python_requires=">=3.10",
+    python_requires=">=3.8",
     # ------------------------------------------------------------------
     # Core (always required)
     # ------------------------------------------------------------------
     install_requires=[
-        "Django>=4.0",
+        "Django>=4.0,<7.0",
         "djangorestframework>=3.15.0",
         "geoip2>=4.8.0",
         "maxminddb>=2.6.0",
@@ -55,7 +62,8 @@ setup(
         ],
         # JWT auth (simplejwt preferred; legacy jwt also accepted)
         "jwt": [
-            "djangorestframework-simplejwt>=5.3.0",
+            "djangorestframework-simplejwt>=5.3.1,<5.5; python_version < '3.9'",
+            "djangorestframework-simplejwt>=5.5.1,<6.0; python_version >= '3.9'",
         ],
         # API filtering
         "filters": [
@@ -89,7 +97,8 @@ setup(
         # All optional features
         "all": [
             "celery>=5.3.0",
-            "djangorestframework-simplejwt>=5.3.0",
+            "djangorestframework-simplejwt>=5.3.1,<5.5; python_version < '3.9'",
+            "djangorestframework-simplejwt>=5.5.1,<6.0; python_version >= '3.9'",
             "django-filter>=23.0",
             "channels>=4.0.0",
             "channels-redis>=4.1.0",

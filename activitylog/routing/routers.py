@@ -6,10 +6,17 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-_ACTIVITYLOG_MODELS = frozenset({
-    "crudevent", "loginevent", "requestevent", "corsevent", "systemevent",
-    "databaseconfig", "retentionpolicy",
-})
+_ACTIVITYLOG_MODELS = frozenset(
+    {
+        "crudevent",
+        "loginevent",
+        "requestevent",
+        "corsevent",
+        "systemevent",
+        "databaseconfig",
+        "retentionpolicy",
+    }
+)
 
 _ROUTE_EVENT_MAP = {
     "crud": {"crudevent"},

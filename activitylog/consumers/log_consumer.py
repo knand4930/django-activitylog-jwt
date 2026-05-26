@@ -50,9 +50,11 @@ try:
                 await self.close(code=4001)
                 return
 
-            if not (user.is_superuser or
-                    user.has_perm("activitylog.view_logs") or
-                    user.has_perm("activitylog.view_all_logs")):
+            if not (
+                user.is_superuser
+                or user.has_perm("activitylog.view_logs")
+                or user.has_perm("activitylog.view_all_logs")
+            ):
                 await self.close(code=4003)
                 return
 
@@ -78,12 +80,17 @@ try:
 
         async def log_event(self, event: dict[str, Any]) -> None:
             """Receive a channel-layer group broadcast and relay to WebSocket."""
-            await self.send(text_data=json.dumps({
-                "type": event.get("event_type"),
-                "event_id": event.get("event_id"),
-            }))
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "type": event.get("event_type"),
+                        "event_id": event.get("event_id"),
+                    }
+                )
+            )
 
 except ImportError:
+
     class ActivityLogConsumer:  # type: ignore[no-redef]
         """Stub — Django Channels is not installed."""
 

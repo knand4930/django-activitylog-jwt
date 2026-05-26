@@ -84,9 +84,7 @@ class CRUDHistoryAdminMixin(BaseProcessActionsAdminMixin, admin.ModelAdmin):
 
     def crud_history_link(self, obj: Model) -> str:
         crud_history_url = self.get_crud_history_url(obj=obj)
-        crud_history_a = (
-            f"<a href={crud_history_url}>> {self.crud_history_translated_title}</a>"
-        )
+        crud_history_a = f"<a href={crud_history_url}>> {self.crud_history_translated_title}</a>"
         return format_html(crud_history_a)
 
     crud_history_link.allow_tags = True

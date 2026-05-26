@@ -15,6 +15,7 @@ class DatabaseHealthMonitor:
 
     def check_all(self) -> dict[str, Any]:
         from activitylog.models import DatabaseConfig
+
         results = {}
         for cfg in DatabaseConfig.objects.filter(is_active=True):
             results[str(cfg.id)] = self.check_single(cfg)
@@ -42,6 +43,7 @@ class DatabaseHealthMonitor:
 
         try:
             import time
+
             t0 = time.perf_counter()
 
             if engine in (DatabaseConfig.POSTGRESQL, DatabaseConfig.MYSQL, DatabaseConfig.SQLITE):
@@ -77,8 +79,10 @@ class DatabaseHealthMonitor:
 
     def _check_django_db(self, cfg) -> None:
         from activitylog.routing.registry import ensure_config_registered
+
         alias = ensure_config_registered(cfg)
         from django.db import connections
+
         conn = connections[alias]
         conn.ensure_connection()
         with conn.cursor() as cur:
@@ -86,6 +90,7 @@ class DatabaseHealthMonitor:
 
     def _check_clickhouse(self, cfg) -> None:
         from django.conf import settings as django_settings
+
         ch_cfg = getattr(django_settings, "ACTIVITYLOG_CLICKHOUSE", {})
         try:
             from clickhouse_driver import Client

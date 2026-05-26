@@ -55,12 +55,14 @@ logger = logging.getLogger(__name__)
 _FILTER_BACKEND_CLASSES = []
 try:
     from django_filters.rest_framework import DjangoFilterBackend
+
     _FILTER_BACKEND_CLASSES.append(DjangoFilterBackend)
 except ImportError:
     pass
 
 try:
     from rest_framework.filters import OrderingFilter, SearchFilter
+
     _FILTER_BACKEND_CLASSES += [SearchFilter, OrderingFilter]
 except ImportError:
     pass
@@ -69,6 +71,7 @@ except ImportError:
 # ---------------------------------------------------------------------------
 # Pagination
 # ---------------------------------------------------------------------------
+
 
 class ActivityLogPagination(PageNumberPagination):
     page_size = 50
@@ -79,6 +82,7 @@ class ActivityLogPagination(PageNumberPagination):
 # ---------------------------------------------------------------------------
 # Shared ViewSet mixin
 # ---------------------------------------------------------------------------
+
 
 class _ActivityLogViewSetMixin(viewsets.ReadOnlyModelViewSet):
     pagination_class = ActivityLogPagination
@@ -133,6 +137,7 @@ class _ActivityLogViewSetMixin(viewsets.ReadOnlyModelViewSet):
 # CRUDEvent
 # ---------------------------------------------------------------------------
 
+
 class CRUDEventViewSet(_ActivityLogViewSetMixin):
     model = CRUDEvent
     queryset = CRUDEvent.objects.select_related("content_type", "user").all()
@@ -146,6 +151,7 @@ class CRUDEventViewSet(_ActivityLogViewSetMixin):
 # LoginEvent
 # ---------------------------------------------------------------------------
 
+
 class LoginEventViewSet(_ActivityLogViewSetMixin):
     model = LoginEvent
     queryset = LoginEvent.objects.select_related("user").all()
@@ -157,9 +163,7 @@ class LoginEventViewSet(_ActivityLogViewSetMixin):
     @action(detail=False, methods=["get"], url_path="failed-logins")
     def failed_logins(self, request):
         """Quick filter for failed login attempts."""
-        qs = self.filter_queryset(
-            self.get_queryset().filter(login_type=LoginEvent.FAILED)
-        )
+        qs = self.filter_queryset(self.get_queryset().filter(login_type=LoginEvent.FAILED))
         page = self.paginate_queryset(qs)
         if page is not None:
             return self.get_paginated_response(self.get_serializer(page, many=True).data)
@@ -170,8 +174,7 @@ class LoginEventViewSet(_ActivityLogViewSetMixin):
         """IPs with 5+ failed logins in the last hour."""
         since = timezone.now() - timedelta(hours=1)
         suspects = (
-            LoginEvent.objects
-            .filter(login_type=LoginEvent.FAILED, datetime__gte=since)
+            LoginEvent.objects.filter(login_type=LoginEvent.FAILED, datetime__gte=since)
             .values("remote_ip")
             .annotate(attempts=Count("id"))
             .filter(attempts__gte=5)
@@ -183,6 +186,7 @@ class LoginEventViewSet(_ActivityLogViewSetMixin):
 # ---------------------------------------------------------------------------
 # RequestEvent
 # ---------------------------------------------------------------------------
+
 
 class RequestEventViewSet(_ActivityLogViewSetMixin):
     model = RequestEvent
@@ -196,9 +200,7 @@ class RequestEventViewSet(_ActivityLogViewSetMixin):
     def slow_requests(self, request):
         """Requests slower than ``threshold_ms`` (default 1000 ms)."""
         threshold = float(request.query_params.get("threshold_ms", 1000))
-        qs = self.filter_queryset(
-            self.get_queryset().filter(response_time_ms__gte=threshold)
-        )
+        qs = self.filter_queryset(self.get_queryset().filter(response_time_ms__gte=threshold))
         page = self.paginate_queryset(qs)
         if page is not None:
             return self.get_paginated_response(self.get_serializer(page, many=True).data)
@@ -209,8 +211,7 @@ class RequestEventViewSet(_ActivityLogViewSetMixin):
         """Aggregate 4xx/5xx counts per URL for the last 24 h."""
         since = timezone.now() - timedelta(hours=24)
         data = (
-            RequestEvent.objects
-            .filter(datetime__gte=since, response_status__gte=400)
+            RequestEvent.objects.filter(datetime__gte=since, response_status__gte=400)
             .values("url", "response_status")
             .annotate(count=Count("id"))
             .order_by("-count")[:50]
@@ -221,6 +222,7 @@ class RequestEventViewSet(_ActivityLogViewSetMixin):
 # ---------------------------------------------------------------------------
 # CorsEvent
 # ---------------------------------------------------------------------------
+
 
 class CorsEventViewSet(_ActivityLogViewSetMixin):
     model = CorsEvent  # patched below
@@ -240,6 +242,7 @@ CorsEventViewSet.filterset_class = CorsEventFilter  # type: ignore[attr-defined]
 # ---------------------------------------------------------------------------
 # SystemEvent
 # ---------------------------------------------------------------------------
+
 
 class SystemEventViewSet(_ActivityLogViewSetMixin):
     model = SystemEvent
@@ -268,6 +271,7 @@ class SystemEventViewSet(_ActivityLogViewSetMixin):
 # DatabaseConfig (admin only)
 # ---------------------------------------------------------------------------
 
+
 class DatabaseConfigViewSet(viewsets.ModelViewSet):
     queryset = DatabaseConfig.objects.all()
     serializer_class = DatabaseConfigSerializer
@@ -281,6 +285,7 @@ class DatabaseConfigViewSet(viewsets.ModelViewSet):
     def health_check(self, request, pk=None):
         """Trigger an immediate health check for this database config."""
         from activitylog.health.monitors import DatabaseHealthMonitor
+
         cfg = self.get_object()
         monitor = DatabaseHealthMonitor()
         result = monitor.check_single(cfg)
@@ -292,6 +297,7 @@ class DatabaseConfigViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         from activitylog.health.monitors import DatabaseHealthMonitor
+
         monitor = DatabaseHealthMonitor()
         cfg = DatabaseConfig(**serializer.validated_data)
         result = monitor.check_single(cfg, save=False)
@@ -301,6 +307,7 @@ class DatabaseConfigViewSet(viewsets.ModelViewSet):
 # ---------------------------------------------------------------------------
 # RetentionPolicy
 # ---------------------------------------------------------------------------
+
 
 class RetentionPolicyViewSet(viewsets.ModelViewSet):
     queryset = RetentionPolicy.objects.all()
@@ -314,6 +321,7 @@ class RetentionPolicyViewSet(viewsets.ModelViewSet):
     def run_now(self, request, pk=None):
         """Execute this retention policy immediately (async if Celery available)."""
         from activitylog.tasks.retention_tasks import cleanup_old_logs
+
         policy = self.get_object()
         count = cleanup_old_logs(event_type=policy.event_type, days=policy.retain_days)
         return Response({"deleted": count})
@@ -322,6 +330,7 @@ class RetentionPolicyViewSet(viewsets.ModelViewSet):
 # ---------------------------------------------------------------------------
 # Dashboard / Analytics
 # ---------------------------------------------------------------------------
+
 
 class ActivityDashboardView(APIView):
     permission_classes = [IsActivityLogViewer]
@@ -340,8 +349,7 @@ class ActivityDashboardView(APIView):
         ).count()
 
         unique_ips = (
-            RequestEvent.objects
-            .filter(datetime__gte=since)
+            RequestEvent.objects.filter(datetime__gte=since)
             .exclude(remote_ip__isnull=True)
             .values("remote_ip")
             .distinct()
@@ -349,8 +357,7 @@ class ActivityDashboardView(APIView):
         )
 
         top_users = list(
-            RequestEvent.objects
-            .filter(datetime__gte=since)
+            RequestEvent.objects.filter(datetime__gte=since)
             .exclude(user__isnull=True)
             .values("user__username")
             .annotate(count=Count("id"))
@@ -358,8 +365,7 @@ class ActivityDashboardView(APIView):
         )
 
         top_urls = list(
-            RequestEvent.objects
-            .filter(datetime__gte=since)
+            RequestEvent.objects.filter(datetime__gte=since)
             .values("url")
             .annotate(count=Count("id"))
             .order_by("-count")[:10]
@@ -391,6 +397,7 @@ class ActivityDashboardView(APIView):
 # SSE real-time endpoint
 # ---------------------------------------------------------------------------
 
+
 class ActivitySSEView(APIView):
     """Server-Sent Events endpoint for real-time log streaming.
 
@@ -409,14 +416,15 @@ class ActivitySSEView(APIView):
 
                 layer = get_channel_layer()
                 if layer is None:
-                    yield "data: {\"error\": \"channel layer not configured\"}\n\n"
+                    yield 'data: {"error": "channel layer not configured"}\n\n'
                     return
 
                 # Subscribe to the activitylog group via a one-shot listener
-                yield "data: {\"status\": \"connected\"}\n\n"
+                yield 'data: {"status": "connected"}\n\n'
 
                 # Simple polling fallback — real Channels consumers use WebSockets
                 import time
+
                 last_ids: dict = {}
                 models_map = {
                     "crud": CRUDEvent,
@@ -433,18 +441,20 @@ class ActivitySSEView(APIView):
                             sid = str(obj.id)
                             if sid != last_id:
                                 last_ids[etype] = sid
-                                payload = json.dumps({
-                                    "type": etype,
-                                    "id": sid,
-                                    "datetime": str(obj.datetime),
-                                })
+                                payload = json.dumps(
+                                    {
+                                        "type": etype,
+                                        "id": sid,
+                                        "datetime": str(obj.datetime),
+                                    }
+                                )
                                 yield f"data: {payload}\n\n"
                     time.sleep(1)
 
             except GeneratorExit:
                 pass
             except Exception as exc:
-                yield f"data: {{\"error\": \"{exc}\"}}\n\n"
+                yield f'data: {{"error": "{exc}"}}\n\n'
 
         response = StreamingHttpResponse(event_stream(), content_type="text/event-stream")
         response["Cache-Control"] = "no-cache"

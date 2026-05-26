@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # Field-level diffing
 # ---------------------------------------------------------------------------
 
+
 def get_field_value(obj, field) -> Any:
     if isinstance(field, DateTimeField):
         try:
@@ -72,6 +73,7 @@ def _get_geo_reader():
         return _GEO_READER
     try:
         import geoip2.database
+
         if os.path.exists(_GEOIP_PATH):
             _GEO_READER = geoip2.database.Reader(_GEOIP_PATH)
     except Exception:
@@ -116,12 +118,14 @@ def get_geo_data(ip: str | None) -> dict[str, str | None]:
 # Misc
 # ---------------------------------------------------------------------------
 
+
 def should_propagate_exceptions() -> bool:
     return bool(getattr(settings, "DJANGO_ACTIVITY_LOG_PROPAGATE_EXCEPTIONS", False))
 
 
 def get_model_list(class_list: list) -> None:
     from django.apps import apps
+
     for idx, item in enumerate(class_list):
         if isinstance(item, str):
             class_list[idx] = apps.get_model(item)

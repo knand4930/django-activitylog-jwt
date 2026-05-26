@@ -12,7 +12,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("activitylog", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
@@ -25,8 +24,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="crudevent",
             name="country_code",
-            field=models.CharField(blank=True, max_length=10, null=True,
-                                   verbose_name="Country code"),
+            field=models.CharField(
+                blank=True, max_length=10, null=True, verbose_name="Country code"
+            ),
         ),
         migrations.AddField(
             model_name="crudevent",
@@ -36,8 +36,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="crudevent",
             name="integrity_hash",
-            field=models.CharField(blank=True, editable=False, max_length=64, null=True,
-                                   verbose_name="Integrity hash"),
+            field=models.CharField(
+                blank=True, editable=False, max_length=64, null=True, verbose_name="Integrity hash"
+            ),
         ),
         migrations.AddField(
             model_name="crudevent",
@@ -50,8 +51,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="loginevent",
             name="country_code",
-            field=models.CharField(blank=True, max_length=10, null=True,
-                                   verbose_name="Country code"),
+            field=models.CharField(
+                blank=True, max_length=10, null=True, verbose_name="Country code"
+            ),
         ),
         migrations.AddField(
             model_name="loginevent",
@@ -61,14 +63,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="loginevent",
             name="session_key",
-            field=models.CharField(blank=True, max_length=255, null=True,
-                                   verbose_name="Session key"),
+            field=models.CharField(
+                blank=True, max_length=255, null=True, verbose_name="Session key"
+            ),
         ),
         migrations.AddField(
             model_name="loginevent",
             name="integrity_hash",
-            field=models.CharField(blank=True, editable=False, max_length=64, null=True,
-                                   verbose_name="Integrity hash"),
+            field=models.CharField(
+                blank=True, editable=False, max_length=64, null=True, verbose_name="Integrity hash"
+            ),
         ),
         migrations.AddField(
             model_name="loginevent",
@@ -81,8 +85,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="requestevent",
             name="country_code",
-            field=models.CharField(blank=True, max_length=10, null=True,
-                                   verbose_name="Country code"),
+            field=models.CharField(
+                blank=True, max_length=10, null=True, verbose_name="Country code"
+            ),
         ),
         migrations.AddField(
             model_name="requestevent",
@@ -92,32 +97,31 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="requestevent",
             name="response_status",
-            field=models.SmallIntegerField(blank=True, db_index=True, null=True,
-                                           verbose_name="Response status"),
+            field=models.SmallIntegerField(
+                blank=True, db_index=True, null=True, verbose_name="Response status"
+            ),
         ),
         migrations.AddField(
             model_name="requestevent",
             name="response_time_ms",
-            field=models.FloatField(blank=True, null=True,
-                                    verbose_name="Response time (ms)"),
+            field=models.FloatField(blank=True, null=True, verbose_name="Response time (ms)"),
         ),
         migrations.AddField(
             model_name="requestevent",
             name="request_body_size",
-            field=models.BigIntegerField(blank=True, null=True,
-                                         verbose_name="Request body size"),
+            field=models.BigIntegerField(blank=True, null=True, verbose_name="Request body size"),
         ),
         migrations.AddField(
             model_name="requestevent",
             name="response_body_size",
-            field=models.BigIntegerField(blank=True, null=True,
-                                         verbose_name="Response body size"),
+            field=models.BigIntegerField(blank=True, null=True, verbose_name="Response body size"),
         ),
         migrations.AddField(
             model_name="requestevent",
             name="integrity_hash",
-            field=models.CharField(blank=True, editable=False, max_length=64, null=True,
-                                   verbose_name="Integrity hash"),
+            field=models.CharField(
+                blank=True, editable=False, max_length=64, null=True, verbose_name="Integrity hash"
+            ),
         ),
         migrations.AddField(
             model_name="requestevent",
@@ -130,8 +134,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="corsevent",
             name="country_code",
-            field=models.CharField(blank=True, max_length=10, null=True,
-                                   verbose_name="Country code"),
+            field=models.CharField(
+                blank=True, max_length=10, null=True, verbose_name="Country code"
+            ),
         ),
         migrations.AddField(
             model_name="corsevent",
@@ -141,8 +146,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="corsevent",
             name="origin",
-            field=models.CharField(blank=True, db_index=True, max_length=512, null=True,
-                                   verbose_name="Origin"),
+            field=models.CharField(
+                blank=True, db_index=True, max_length=512, null=True, verbose_name="Origin"
+            ),
         ),
         migrations.AddField(
             model_name="corsevent",
@@ -152,8 +158,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="corsevent",
             name="integrity_hash",
-            field=models.CharField(blank=True, editable=False, max_length=64, null=True,
-                                   verbose_name="Integrity hash"),
+            field=models.CharField(
+                blank=True, editable=False, max_length=64, null=True, verbose_name="Integrity hash"
+            ),
         ),
         migrations.AddField(
             model_name="corsevent",
@@ -166,50 +173,122 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="SystemEvent",
             fields=[
-                ("id", models.UUIDField(default=uuid.uuid4, editable=False,
-                                        primary_key=True, serialize=False)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                    ),
+                ),
                 ("browser", models.TextField(blank=True, null=True, verbose_name="Browser")),
                 ("platform", models.TextField(blank=True, null=True, verbose_name="Platform")),
-                ("operating_system", models.TextField(blank=True, null=True,
-                                                       verbose_name="Operating system")),
+                (
+                    "operating_system",
+                    models.TextField(blank=True, null=True, verbose_name="Operating system"),
+                ),
                 ("user_agent", models.TextField(blank=True, null=True, verbose_name="User agent")),
-                ("latitude", models.CharField(blank=True, max_length=50, null=True,
-                                              verbose_name="Latitude")),
-                ("longitude", models.CharField(blank=True, max_length=50, null=True,
-                                               verbose_name="Longitude")),
-                ("city", models.CharField(blank=True, max_length=255, null=True,
-                                          verbose_name="City")),
-                ("country", models.CharField(blank=True, max_length=255, null=True,
-                                             verbose_name="Country")),
-                ("country_code", models.CharField(blank=True, max_length=10, null=True,
-                                                  verbose_name="Country code")),
-                ("remote_ip", models.CharField(blank=True, db_index=True, max_length=50,
-                                               null=True, verbose_name="Remote IP")),
-                ("integrity_hash", models.CharField(blank=True, editable=False, max_length=64,
-                                                    null=True, verbose_name="Integrity hash")),
+                (
+                    "latitude",
+                    models.CharField(blank=True, max_length=50, null=True, verbose_name="Latitude"),
+                ),
+                (
+                    "longitude",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Longitude"
+                    ),
+                ),
+                (
+                    "city",
+                    models.CharField(blank=True, max_length=255, null=True, verbose_name="City"),
+                ),
+                (
+                    "country",
+                    models.CharField(blank=True, max_length=255, null=True, verbose_name="Country"),
+                ),
+                (
+                    "country_code",
+                    models.CharField(
+                        blank=True, max_length=10, null=True, verbose_name="Country code"
+                    ),
+                ),
+                (
+                    "remote_ip",
+                    models.CharField(
+                        blank=True,
+                        db_index=True,
+                        max_length=50,
+                        null=True,
+                        verbose_name="Remote IP",
+                    ),
+                ),
+                (
+                    "integrity_hash",
+                    models.CharField(
+                        blank=True,
+                        editable=False,
+                        max_length=64,
+                        null=True,
+                        verbose_name="Integrity hash",
+                    ),
+                ),
                 ("extra_data", models.JSONField(blank=True, null=True, verbose_name="Extra data")),
-                ("datetime", models.DateTimeField(db_index=True,
-                                                  default=django.utils.timezone.now,
-                                                  verbose_name="Date time")),
-                ("event_name", models.CharField(db_index=True, max_length=255,
-                                                verbose_name="Event name")),
-                ("severity", models.CharField(
-                    choices=[("INFO", "Info"), ("WARNING", "Warning"),
-                             ("ERROR", "Error"), ("CRITICAL", "Critical")],
-                    db_index=True, default="INFO", max_length=20, verbose_name="Severity")),
-                ("category", models.CharField(
-                    choices=[("server", "Server"), ("security", "Security"),
-                             ("database", "Database"), ("celery", "Celery"),
-                             ("custom", "Custom")],
-                    db_index=True, default="custom", max_length=50, verbose_name="Category")),
+                (
+                    "datetime",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now, verbose_name="Date time"
+                    ),
+                ),
+                (
+                    "event_name",
+                    models.CharField(db_index=True, max_length=255, verbose_name="Event name"),
+                ),
+                (
+                    "severity",
+                    models.CharField(
+                        choices=[
+                            ("INFO", "Info"),
+                            ("WARNING", "Warning"),
+                            ("ERROR", "Error"),
+                            ("CRITICAL", "Critical"),
+                        ],
+                        db_index=True,
+                        default="INFO",
+                        max_length=20,
+                        verbose_name="Severity",
+                    ),
+                ),
+                (
+                    "category",
+                    models.CharField(
+                        choices=[
+                            ("server", "Server"),
+                            ("security", "Security"),
+                            ("database", "Database"),
+                            ("celery", "Celery"),
+                            ("custom", "Custom"),
+                        ],
+                        db_index=True,
+                        default="custom",
+                        max_length=50,
+                        verbose_name="Category",
+                    ),
+                ),
                 ("message", models.TextField(verbose_name="Message")),
-                ("source", models.CharField(blank=True, max_length=512, null=True,
-                                            verbose_name="Source")),
+                (
+                    "source",
+                    models.CharField(blank=True, max_length=512, null=True, verbose_name="Source"),
+                ),
                 ("traceback", models.TextField(blank=True, null=True, verbose_name="Traceback")),
-                ("user", models.ForeignKey(
-                    blank=True, db_constraint=False, null=True,
-                    on_delete=django.db.models.deletion.SET_NULL,
-                    to=settings.AUTH_USER_MODEL, verbose_name="User")),
+                (
+                    "user",
+                    models.ForeignKey(
+                        blank=True,
+                        db_constraint=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="User",
+                    ),
+                ),
             ],
             options={
                 "verbose_name": "System event",
@@ -231,42 +310,91 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="DatabaseConfig",
             fields=[
-                ("id", models.UUIDField(default=uuid.uuid4, editable=False,
-                                        primary_key=True, serialize=False)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                    ),
+                ),
                 ("name", models.CharField(max_length=255, unique=True, verbose_name="Name")),
-                ("engine", models.CharField(
-                    choices=[("postgresql", "PostgreSQL"), ("mysql", "MySQL"),
-                             ("sqlite", "SQLite"), ("clickhouse", "ClickHouse"),
-                             ("mongodb", "MongoDB"), ("scylladb", "ScyllaDB / Cassandra")],
-                    max_length=50, verbose_name="Engine")),
+                (
+                    "engine",
+                    models.CharField(
+                        choices=[
+                            ("postgresql", "PostgreSQL"),
+                            ("mysql", "MySQL"),
+                            ("sqlite", "SQLite"),
+                            ("clickhouse", "ClickHouse"),
+                            ("mongodb", "MongoDB"),
+                            ("scylladb", "ScyllaDB / Cassandra"),
+                        ],
+                        max_length=50,
+                        verbose_name="Engine",
+                    ),
+                ),
                 ("host", models.CharField(max_length=512, verbose_name="Host")),
                 ("port", models.PositiveIntegerField(blank=True, null=True, verbose_name="Port")),
-                ("database_name", models.CharField(max_length=255,
-                                                   verbose_name="Database name")),
-                ("username", models.CharField(blank=True, max_length=255, null=True,
-                                              verbose_name="Username")),
-                ("password", models.TextField(blank=True, db_column="password", null=True,
-                                              verbose_name="Password (encrypted)")),
-                ("route_for", models.CharField(
-                    choices=[("all", "All events"), ("crud", "CRUD events only"),
-                             ("auth", "Auth/login events only"),
-                             ("request", "Request events only"),
-                             ("system", "System events only"),
-                             ("analytics", "Analytics / high-volume")],
-                    default="all", max_length=20, verbose_name="Route for")),
+                ("database_name", models.CharField(max_length=255, verbose_name="Database name")),
+                (
+                    "username",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Username"
+                    ),
+                ),
+                (
+                    "password",
+                    models.TextField(
+                        blank=True,
+                        db_column="password",
+                        null=True,
+                        verbose_name="Password (encrypted)",
+                    ),
+                ),
+                (
+                    "route_for",
+                    models.CharField(
+                        choices=[
+                            ("all", "All events"),
+                            ("crud", "CRUD events only"),
+                            ("auth", "Auth/login events only"),
+                            ("request", "Request events only"),
+                            ("system", "System events only"),
+                            ("analytics", "Analytics / high-volume"),
+                        ],
+                        default="all",
+                        max_length=20,
+                        verbose_name="Route for",
+                    ),
+                ),
                 ("is_primary", models.BooleanField(default=False, verbose_name="Is primary")),
-                ("is_active", models.BooleanField(db_index=True, default=True,
-                                                  verbose_name="Is active")),
+                (
+                    "is_active",
+                    models.BooleanField(db_index=True, default=True, verbose_name="Is active"),
+                ),
                 ("is_readonly", models.BooleanField(default=False, verbose_name="Read only")),
-                ("tenant_id", models.CharField(blank=True, db_index=True, max_length=255,
-                                               null=True, verbose_name="Tenant ID")),
-                ("connection_options", models.JSONField(blank=True, default=dict,
-                                                        verbose_name="Connection options")),
-                ("last_health_check", models.DateTimeField(blank=True, null=True,
-                                                           verbose_name="Last health check")),
+                (
+                    "tenant_id",
+                    models.CharField(
+                        blank=True,
+                        db_index=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Tenant ID",
+                    ),
+                ),
+                (
+                    "connection_options",
+                    models.JSONField(blank=True, default=dict, verbose_name="Connection options"),
+                ),
+                (
+                    "last_health_check",
+                    models.DateTimeField(blank=True, null=True, verbose_name="Last health check"),
+                ),
                 ("is_healthy", models.BooleanField(null=True, verbose_name="Is healthy")),
-                ("health_error", models.TextField(blank=True, null=True,
-                                                  verbose_name="Health error")),
+                (
+                    "health_error",
+                    models.TextField(blank=True, null=True, verbose_name="Health error"),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
             ],
@@ -282,22 +410,46 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="RetentionPolicy",
             fields=[
-                ("id", models.UUIDField(default=uuid.uuid4, editable=False,
-                                        primary_key=True, serialize=False)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False
+                    ),
+                ),
                 ("name", models.CharField(max_length=255, unique=True, verbose_name="Name")),
-                ("event_type", models.CharField(
-                    choices=[("crud", "CRUD events"), ("login", "Login events"),
-                             ("request", "Request events"), ("cors", "CORS events"),
-                             ("system", "System events"), ("all", "All events")],
-                    default="all", max_length=20, verbose_name="Event type")),
+                (
+                    "event_type",
+                    models.CharField(
+                        choices=[
+                            ("crud", "CRUD events"),
+                            ("login", "Login events"),
+                            ("request", "Request events"),
+                            ("cors", "CORS events"),
+                            ("system", "System events"),
+                            ("all", "All events"),
+                        ],
+                        default="all",
+                        max_length=20,
+                        verbose_name="Event type",
+                    ),
+                ),
                 ("retain_days", models.PositiveIntegerField(verbose_name="Retain for (days)")),
                 ("is_active", models.BooleanField(default=True, verbose_name="Is active")),
-                ("tenant_id", models.CharField(blank=True, db_index=True, max_length=255,
-                                               null=True, verbose_name="Tenant ID")),
-                ("last_run", models.DateTimeField(blank=True, null=True,
-                                                  verbose_name="Last run")),
-                ("records_deleted", models.BigIntegerField(default=0,
-                                                           verbose_name="Records deleted (total)")),
+                (
+                    "tenant_id",
+                    models.CharField(
+                        blank=True,
+                        db_index=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="Tenant ID",
+                    ),
+                ),
+                ("last_run", models.DateTimeField(blank=True, null=True, verbose_name="Last run")),
+                (
+                    "records_deleted",
+                    models.BigIntegerField(default=0, verbose_name="Records deleted (total)"),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
             ],
@@ -315,13 +467,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="crudevent",
-            index=models.Index(fields=["event_type", "datetime"],
-                               name="actlog_crud_evtype_dt_idx"),
+            index=models.Index(fields=["event_type", "datetime"], name="actlog_crud_evtype_dt_idx"),
         ),
         migrations.AddIndex(
             model_name="loginevent",
-            index=models.Index(fields=["login_type", "datetime"],
-                               name="actlog_login_type_dt_idx"),
+            index=models.Index(fields=["login_type", "datetime"], name="actlog_login_type_dt_idx"),
         ),
         migrations.AddIndex(
             model_name="loginevent",
@@ -333,7 +483,8 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="requestevent",
-            index=models.Index(fields=["response_status", "datetime"],
-                               name="actlog_req_status_dt_idx"),
+            index=models.Index(
+                fields=["response_status", "datetime"], name="actlog_req_status_dt_idx"
+            ),
         ),
     ]

@@ -10,6 +10,7 @@ class ActivitylogConfig(AppConfig):
 
     def ready(self) -> None:
         from activitylog.compat import assert_django_compatible
+
         assert_django_compatible()
 
         # Populate UNREGISTERED_CLASSES / REGISTERED_CLASSES in settings shim
@@ -50,13 +51,22 @@ class ActivitylogConfig(AppConfig):
         )
 
         builtin_excluded = [
-            CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent,
-            DatabaseConfig, RetentionPolicy,
-            Migration, Session, Permission, ContentType,
+            CRUDEvent,
+            LoginEvent,
+            RequestEvent,
+            CorsEvent,
+            SystemEvent,
+            DatabaseConfig,
+            RetentionPolicy,
+            Migration,
+            Session,
+            Permission,
+            ContentType,
             MigrationRecorder.Migration,
         ]
         if django_apps.is_installed("django.contrib.admin"):
             from django.contrib.admin.models import LogEntry
+
             builtin_excluded.append(LogEntry)
 
         # User-supplied extras (may be dotted strings)
@@ -81,6 +91,7 @@ class ActivitylogConfig(AppConfig):
 def _resolve_strings(class_list: list) -> None:
     """Resolve any dotted-string items in *class_list* to model classes in place."""
     from django.apps import apps
+
     for idx, item in enumerate(class_list):
         if isinstance(item, str):
             class_list[idx] = apps.get_model(item)

@@ -7,6 +7,7 @@ from django.utils import timezone
 _FILTER_AVAILABLE = False
 try:
     import django_filters
+
     _FILTER_AVAILABLE = True
 except ImportError:
     pass
@@ -24,10 +25,10 @@ if _FILTER_AVAILABLE:
 
     class DateRangeFilter(django_filters.FilterSet):
         """Mixin that adds ``date_from`` / ``date_to`` filters on ``datetime``."""
+
         date_from = django_filters.IsoDateTimeFilter(field_name="datetime", lookup_expr="gte")
         date_to = django_filters.IsoDateTimeFilter(field_name="datetime", lookup_expr="lte")
-        last_hours = django_filters.NumberFilter(method="_filter_last_hours",
-                                                 label="Last N hours")
+        last_hours = django_filters.NumberFilter(method="_filter_last_hours", label="Last N hours")
 
         def _filter_last_hours(self, queryset, name, value):  # noqa: ARG002
             since = timezone.now() - timezone.timedelta(hours=float(value))

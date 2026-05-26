@@ -119,13 +119,9 @@ class ActivityLogModelAdmin(admin.ModelAdmin):
                         request, _("Successfully removed {:d} rows").format(n), messages.SUCCESS
                     )
                 except Exception as e:
-                    modeladmin.message_user(
-                        request, f"{_('ERROR')}: {e!r}", messages.ERROR
-                    )
+                    modeladmin.message_user(request, f"{_('ERROR')}: {e!r}", messages.ERROR)
             else:
-                modeladmin.message_user(
-                    request, _("Action cancelled by user"), messages.SUCCESS
-                )
+                modeladmin.message_user(request, _("Action cancelled by user"), messages.SUCCESS)
             return HttpResponseRedirect(
                 reverse(f"admin:{opts.app_label}_{opts.model_name}_changelist")
             )

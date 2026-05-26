@@ -1,4 +1,4 @@
-"""Activity log models — compatible with Django 4.2 – 6.x and Python 3.10 – 3.13+."""
+"""Activity log models — compatible with Django 4.x – 6.x and Python 3.8 – 3.14+."""
 
 from __future__ import annotations
 
@@ -33,14 +33,21 @@ class BaseEvent(models.Model):
     longitude = models.CharField(max_length=50, null=True, blank=True, verbose_name=_("Longitude"))
     city = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("City"))
     country = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Country"))
-    country_code = models.CharField(max_length=10, null=True, blank=True, verbose_name=_("Country code"))
+    country_code = models.CharField(
+        max_length=10, null=True, blank=True, verbose_name=_("Country code")
+    )
 
-    remote_ip = models.CharField(max_length=50, null=True, blank=True, db_index=True, verbose_name=_("Remote IP"))
+    remote_ip = models.CharField(
+        max_length=50, null=True, blank=True, db_index=True, verbose_name=_("Remote IP")
+    )
 
-    integrity_hash = models.CharField(max_length=64, null=True, blank=True, editable=False,
-                                      verbose_name=_("Integrity hash"))
+    integrity_hash = models.CharField(
+        max_length=64, null=True, blank=True, editable=False, verbose_name=_("Integrity hash")
+    )
     extra_data = models.JSONField(null=True, blank=True, verbose_name=_("Extra data"))
-    datetime = models.DateTimeField(default=timezone.now, db_index=True, verbose_name=_("Date time"))
+    datetime = models.DateTimeField(
+        default=timezone.now, db_index=True, verbose_name=_("Date time")
+    )
 
     class Meta:
         abstract = True
@@ -58,6 +65,7 @@ class BaseEvent(models.Model):
 # ---------------------------------------------------------------------------
 # CRUD Events
 # ---------------------------------------------------------------------------
+
 
 class CRUDEvent(BaseEvent):
     CREATE = 1
@@ -86,21 +94,30 @@ class CRUDEvent(BaseEvent):
         (M2M_CLEAR_REV, _("Reverse Many-to-Many Clear")),
     )
 
-    event_type = models.SmallIntegerField(choices=TYPES, db_index=True, verbose_name=_("Event type"))
+    event_type = models.SmallIntegerField(
+        choices=TYPES, db_index=True, verbose_name=_("Event type")
+    )
     object_id = models.CharField(max_length=255, db_index=True, verbose_name=_("Object ID"))
     content_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, db_constraint=False, verbose_name=_("Content type")
     )
     object_repr = models.TextField(null=True, blank=True, verbose_name=_("Object representation"))
-    object_json_repr = models.TextField(null=True, blank=True, verbose_name=_("Object JSON representation"))
+    object_json_repr = models.TextField(
+        null=True, blank=True, verbose_name=_("Object JSON representation")
+    )
     changed_fields = models.TextField(null=True, blank=True, verbose_name=_("Changed fields"))
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        db_constraint=False,
+        verbose_name=_("User"),
     )
-    user_pk_as_string = models.CharField(max_length=255, null=True, blank=True,
-                                         verbose_name=_("User PK as string"))
+    user_pk_as_string = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name=_("User PK as string")
+    )
 
     def is_create(self):
         return self.event_type == self.CREATE
@@ -138,6 +155,7 @@ class CRUDEvent(BaseEvent):
 # Login Events
 # ---------------------------------------------------------------------------
 
+
 class LoginEvent(BaseEvent):
     LOGIN = 0
     LOGOUT = 1
@@ -153,13 +171,23 @@ class LoginEvent(BaseEvent):
         (PASSWORD_CHANGE, _("Password change")),
     )
 
-    login_type = models.SmallIntegerField(choices=TYPES, db_index=True, verbose_name=_("Event type"))
-    username = models.CharField(max_length=255, null=True, blank=True, db_index=True, verbose_name=_("Username"))
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
+    login_type = models.SmallIntegerField(
+        choices=TYPES, db_index=True, verbose_name=_("Event type")
     )
-    session_key = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Session key"))
+    username = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, verbose_name=_("Username")
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        db_constraint=False,
+        verbose_name=_("User"),
+    )
+    session_key = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name=_("Session key")
+    )
 
     def _hash_fields(self) -> dict[str, Any]:
         return {
@@ -186,19 +214,31 @@ class LoginEvent(BaseEvent):
 # Request Events
 # ---------------------------------------------------------------------------
 
+
 class RequestEvent(BaseEvent):
     url = models.CharField(max_length=2048, db_index=True, verbose_name=_("URL"))
     method = models.CharField(max_length=20, db_index=True, verbose_name=_("Method"))
     query_string = models.TextField(null=True, blank=True, verbose_name=_("Query string"))
-    response_status = models.SmallIntegerField(null=True, blank=True, db_index=True,
-                                               verbose_name=_("Response status"))
-    response_time_ms = models.FloatField(null=True, blank=True, verbose_name=_("Response time (ms)"))
-    request_body_size = models.BigIntegerField(null=True, blank=True, verbose_name=_("Request body size"))
-    response_body_size = models.BigIntegerField(null=True, blank=True, verbose_name=_("Response body size"))
+    response_status = models.SmallIntegerField(
+        null=True, blank=True, db_index=True, verbose_name=_("Response status")
+    )
+    response_time_ms = models.FloatField(
+        null=True, blank=True, verbose_name=_("Response time (ms)")
+    )
+    request_body_size = models.BigIntegerField(
+        null=True, blank=True, verbose_name=_("Request body size")
+    )
+    response_body_size = models.BigIntegerField(
+        null=True, blank=True, verbose_name=_("Response body size")
+    )
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        db_constraint=False,
+        verbose_name=_("User"),
     )
 
     def _hash_fields(self) -> dict[str, Any]:
@@ -227,16 +267,27 @@ class RequestEvent(BaseEvent):
 # CORS Events
 # ---------------------------------------------------------------------------
 
+
 class CorsEvent(BaseEvent):
-    url = models.CharField(max_length=2048, null=True, blank=True, db_index=True, verbose_name=_("URL"))
-    method = models.CharField(max_length=20, null=True, blank=True, db_index=True, verbose_name=_("Method"))
+    url = models.CharField(
+        max_length=2048, null=True, blank=True, db_index=True, verbose_name=_("URL")
+    )
+    method = models.CharField(
+        max_length=20, null=True, blank=True, db_index=True, verbose_name=_("Method")
+    )
     query_string = models.TextField(null=True, blank=True, verbose_name=_("Query string"))
-    origin = models.CharField(max_length=512, null=True, blank=True, db_index=True, verbose_name=_("Origin"))
+    origin = models.CharField(
+        max_length=512, null=True, blank=True, db_index=True, verbose_name=_("Origin")
+    )
     allowed = models.BooleanField(null=True, blank=True, verbose_name=_("Allowed"))
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        db_constraint=False,
+        verbose_name=_("User"),
     )
 
     def _hash_fields(self) -> dict[str, Any]:
@@ -262,6 +313,7 @@ class CorsEvent(BaseEvent):
 # ---------------------------------------------------------------------------
 # System Events
 # ---------------------------------------------------------------------------
+
 
 class SystemEvent(BaseEvent):
     INFO = "INFO"
@@ -291,17 +343,31 @@ class SystemEvent(BaseEvent):
     )
 
     event_name = models.CharField(max_length=255, db_index=True, verbose_name=_("Event name"))
-    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES, default=INFO,
-                                db_index=True, verbose_name=_("Severity"))
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default=CATEGORY_CUSTOM,
-                                db_index=True, verbose_name=_("Category"))
+    severity = models.CharField(
+        max_length=20,
+        choices=SEVERITY_CHOICES,
+        default=INFO,
+        db_index=True,
+        verbose_name=_("Severity"),
+    )
+    category = models.CharField(
+        max_length=50,
+        choices=CATEGORY_CHOICES,
+        default=CATEGORY_CUSTOM,
+        db_index=True,
+        verbose_name=_("Category"),
+    )
     message = models.TextField(verbose_name=_("Message"))
     source = models.CharField(max_length=512, null=True, blank=True, verbose_name=_("Source"))
     traceback = models.TextField(null=True, blank=True, verbose_name=_("Traceback"))
 
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, db_constraint=False, verbose_name=_("User"),
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        db_constraint=False,
+        verbose_name=_("User"),
     )
 
     def _hash_fields(self) -> dict[str, Any]:
@@ -328,6 +394,7 @@ class SystemEvent(BaseEvent):
 # ---------------------------------------------------------------------------
 # Database Configuration (multi-DB support)
 # ---------------------------------------------------------------------------
+
 
 class DatabaseConfig(models.Model):
     POSTGRESQL = "postgresql"
@@ -371,24 +438,31 @@ class DatabaseConfig(models.Model):
     database_name = models.CharField(max_length=255, verbose_name=_("Database name"))
     username = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Username"))
     # Stored encrypted — see DatabaseConfig.save()
-    _password = models.TextField(null=True, blank=True, db_column="password",
-                                 verbose_name=_("Password (encrypted)"))
+    _password = models.TextField(
+        null=True, blank=True, db_column="password", verbose_name=_("Password (encrypted)")
+    )
 
-    route_for = models.CharField(max_length=20, choices=ROUTE_CHOICES, default=ROUTE_ALL,
-                                 verbose_name=_("Route for"))
+    route_for = models.CharField(
+        max_length=20, choices=ROUTE_CHOICES, default=ROUTE_ALL, verbose_name=_("Route for")
+    )
     is_primary = models.BooleanField(default=False, verbose_name=_("Is primary"))
     is_active = models.BooleanField(default=True, db_index=True, verbose_name=_("Is active"))
     is_readonly = models.BooleanField(default=False, verbose_name=_("Read only"))
 
     # Per-tenant isolation
-    tenant_id = models.CharField(max_length=255, null=True, blank=True, db_index=True,
-                                 verbose_name=_("Tenant ID"))
+    tenant_id = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, verbose_name=_("Tenant ID")
+    )
 
     # Extra options as JSON (pool_size, ssl_mode, timeout, etc.)
-    connection_options = models.JSONField(default=dict, blank=True, verbose_name=_("Connection options"))
+    connection_options = models.JSONField(
+        default=dict, blank=True, verbose_name=_("Connection options")
+    )
 
     # Health tracking
-    last_health_check = models.DateTimeField(null=True, blank=True, verbose_name=_("Last health check"))
+    last_health_check = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Last health check")
+    )
     is_healthy = models.BooleanField(null=True, blank=True, verbose_name=_("Is healthy"))
     health_error = models.TextField(null=True, blank=True, verbose_name=_("Health error"))
 
@@ -409,6 +483,7 @@ class DatabaseConfig(models.Model):
             return None
         try:
             from activitylog.security.integrity import decrypt_credential
+
             return decrypt_credential(self._password)
         except Exception:
             return self._password
@@ -420,6 +495,7 @@ class DatabaseConfig(models.Model):
         else:
             try:
                 from activitylog.security.integrity import encrypt_credential
+
                 self._password = encrypt_credential(value)
             except Exception:
                 self._password = value
@@ -448,6 +524,7 @@ class DatabaseConfig(models.Model):
 # Retention Policy
 # ---------------------------------------------------------------------------
 
+
 class RetentionPolicy(models.Model):
     CRUD_EVENTS = "crud"
     LOGIN_EVENTS = "login"
@@ -467,12 +544,14 @@ class RetentionPolicy(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255, unique=True, verbose_name=_("Name"))
-    event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES, default=ALL_EVENTS,
-                                  verbose_name=_("Event type"))
+    event_type = models.CharField(
+        max_length=20, choices=EVENT_TYPE_CHOICES, default=ALL_EVENTS, verbose_name=_("Event type")
+    )
     retain_days = models.PositiveIntegerField(verbose_name=_("Retain for (days)"))
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
-    tenant_id = models.CharField(max_length=255, null=True, blank=True, db_index=True,
-                                 verbose_name=_("Tenant ID"))
+    tenant_id = models.CharField(
+        max_length=255, null=True, blank=True, db_index=True, verbose_name=_("Tenant ID")
+    )
     last_run = models.DateTimeField(null=True, blank=True, verbose_name=_("Last run"))
     records_deleted = models.BigIntegerField(default=0, verbose_name=_("Records deleted (total)"))
 

@@ -8,16 +8,21 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--days", type=int, default=90,
+            "--days",
+            type=int,
+            default=90,
             help="Delete records older than this many days (default: 90).",
         )
         parser.add_argument(
-            "--type", dest="event_type", default="all",
+            "--type",
+            dest="event_type",
+            default="all",
             choices=["all", "crud", "login", "request", "cors", "system"],
             help="Which event type to purge (default: all).",
         )
         parser.add_argument(
-            "--dry-run", action="store_true",
+            "--dry-run",
+            action="store_true",
             help="Show how many records would be deleted without deleting them.",
         )
 
@@ -64,4 +69,6 @@ class Command(BaseCommand):
                 self.stdout.write(f"{model.__name__}: would delete {count} records")
 
         label = "Would delete" if dry_run else "Deleted"
-        self.stdout.write(self.style.SUCCESS(f"{label} {total} total records older than {days} days."))
+        self.stdout.write(
+            self.style.SUCCESS(f"{label} {total} total records older than {days} days.")
+        )

@@ -18,6 +18,7 @@ _thread_locals = local()
 # Thread-local accessors (used by signals)
 # ---------------------------------------------------------------------------
 
+
 class _MockRequest:
     def __init__(self, user=None):
         self.user = user
@@ -53,6 +54,7 @@ def set_local_details():
 # Middleware
 # ---------------------------------------------------------------------------
 
+
 class ActivityLogMiddleware:
     """Attach the current HTTP request to thread-local storage so that Django
     signals (fired during the request/response cycle) can access it without
@@ -66,6 +68,7 @@ class ActivityLogMiddleware:
     def __init__(self, get_response: Callable) -> None:
         self.get_response = get_response
         from django.conf import settings
+
         self._watch_requests: bool = getattr(
             settings, "DJANGO_ACTIVITY_LOG_WATCH_REQUEST_EVENTS", True
         )
@@ -122,8 +125,7 @@ class ActivityLogMiddleware:
                 req_size = int(request.META.get("CONTENT_LENGTH") or 0) or None
 
             (
-                RequestEvent.objects
-                .filter(
+                RequestEvent.objects.filter(
                     url=request.path_info,
                     method=request.method,
                     datetime__gte=threshold,

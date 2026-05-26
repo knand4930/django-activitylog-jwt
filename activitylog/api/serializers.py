@@ -18,6 +18,7 @@ from activitylog.models import (
 # Shared geo mixin
 # ---------------------------------------------------------------------------
 
+
 class _GeoMixin(serializers.ModelSerializer):
     geo = serializers.SerializerMethodField()
 
@@ -35,6 +36,7 @@ class _GeoMixin(serializers.ModelSerializer):
 # Event serializers
 # ---------------------------------------------------------------------------
 
+
 class CRUDEventSerializer(_GeoMixin):
     event_type_display = serializers.CharField(source="get_event_type_display", read_only=True)
     is_tampered = serializers.SerializerMethodField()
@@ -47,13 +49,25 @@ class CRUDEventSerializer(_GeoMixin):
     class Meta:
         model = CRUDEvent
         fields = [
-            "id", "event_type", "event_type_display",
-            "object_id", "content_type", "object_repr", "object_json_repr",
+            "id",
+            "event_type",
+            "event_type_display",
+            "object_id",
+            "content_type",
+            "object_repr",
+            "object_json_repr",
             "changed_fields",
-            "user", "user_pk_as_string",
-            "remote_ip", "browser", "platform", "operating_system", "user_agent",
-            "geo", "extra_data",
-            "integrity_hash", "is_tampered",
+            "user",
+            "user_pk_as_string",
+            "remote_ip",
+            "browser",
+            "platform",
+            "operating_system",
+            "user_agent",
+            "geo",
+            "extra_data",
+            "integrity_hash",
+            "is_tampered",
             "datetime",
         ]
         read_only_fields = fields
@@ -71,11 +85,21 @@ class LoginEventSerializer(_GeoMixin):
     class Meta:
         model = LoginEvent
         fields = [
-            "id", "login_type", "login_type_display",
-            "username", "user", "session_key",
-            "remote_ip", "browser", "platform", "operating_system", "user_agent",
-            "geo", "extra_data",
-            "integrity_hash", "is_tampered",
+            "id",
+            "login_type",
+            "login_type_display",
+            "username",
+            "user",
+            "session_key",
+            "remote_ip",
+            "browser",
+            "platform",
+            "operating_system",
+            "user_agent",
+            "geo",
+            "extra_data",
+            "integrity_hash",
+            "is_tampered",
             "datetime",
         ]
         read_only_fields = fields
@@ -92,13 +116,24 @@ class RequestEventSerializer(_GeoMixin):
     class Meta:
         model = RequestEvent
         fields = [
-            "id", "url", "method", "query_string",
-            "response_status", "response_time_ms",
-            "request_body_size", "response_body_size",
+            "id",
+            "url",
+            "method",
+            "query_string",
+            "response_status",
+            "response_time_ms",
+            "request_body_size",
+            "response_body_size",
             "user",
-            "remote_ip", "browser", "platform", "operating_system", "user_agent",
-            "geo", "extra_data",
-            "integrity_hash", "is_tampered",
+            "remote_ip",
+            "browser",
+            "platform",
+            "operating_system",
+            "user_agent",
+            "geo",
+            "extra_data",
+            "integrity_hash",
+            "is_tampered",
             "datetime",
         ]
         read_only_fields = fields
@@ -115,11 +150,22 @@ class CorsEventSerializer(_GeoMixin):
     class Meta:
         model = CorsEvent  # noqa: F821 – alias handled below
         fields = [
-            "id", "url", "method", "query_string", "origin", "allowed",
+            "id",
+            "url",
+            "method",
+            "query_string",
+            "origin",
+            "allowed",
             "user",
-            "remote_ip", "browser", "platform", "operating_system", "user_agent",
-            "geo", "extra_data",
-            "integrity_hash", "is_tampered",
+            "remote_ip",
+            "browser",
+            "platform",
+            "operating_system",
+            "user_agent",
+            "geo",
+            "extra_data",
+            "integrity_hash",
+            "is_tampered",
             "datetime",
         ]
         read_only_fields = fields
@@ -140,12 +186,19 @@ class SystemEventSerializer(_GeoMixin):
     class Meta:
         model = SystemEvent
         fields = [
-            "id", "event_name", "severity", "category",
-            "message", "source", "traceback",
+            "id",
+            "event_name",
+            "severity",
+            "category",
+            "message",
+            "source",
+            "traceback",
             "user",
-            "remote_ip", "extra_data",
+            "remote_ip",
+            "extra_data",
             "geo",
-            "integrity_hash", "is_tampered",
+            "integrity_hash",
+            "is_tampered",
             "datetime",
         ]
         read_only_fields = fields
@@ -155,21 +208,41 @@ class SystemEventSerializer(_GeoMixin):
 # DatabaseConfig serializer
 # ---------------------------------------------------------------------------
 
+
 class DatabaseConfigSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = DatabaseConfig
         fields = [
-            "id", "name", "engine",
-            "host", "port", "database_name", "username", "password",
-            "route_for", "is_primary", "is_active", "is_readonly",
-            "tenant_id", "connection_options",
-            "last_health_check", "is_healthy", "health_error",
-            "created_at", "updated_at",
+            "id",
+            "name",
+            "engine",
+            "host",
+            "port",
+            "database_name",
+            "username",
+            "password",
+            "route_for",
+            "is_primary",
+            "is_active",
+            "is_readonly",
+            "tenant_id",
+            "connection_options",
+            "last_health_check",
+            "is_healthy",
+            "health_error",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ["id", "last_health_check", "is_healthy", "health_error",
-                            "created_at", "updated_at"]
+        read_only_fields = [
+            "id",
+            "last_health_check",
+            "is_healthy",
+            "health_error",
+            "created_at",
+            "updated_at",
+        ]
 
     def create(self, validated_data):
         password = validated_data.pop("password", None)
@@ -192,14 +265,21 @@ class DatabaseConfigSerializer(serializers.ModelSerializer):
 # RetentionPolicy serializer
 # ---------------------------------------------------------------------------
 
+
 class RetentionPolicySerializer(serializers.ModelSerializer):
     class Meta:
         model = RetentionPolicy
         fields = [
-            "id", "name", "event_type", "retain_days",
-            "is_active", "tenant_id",
-            "last_run", "records_deleted",
-            "created_at", "updated_at",
+            "id",
+            "name",
+            "event_type",
+            "retain_days",
+            "is_active",
+            "tenant_id",
+            "last_run",
+            "records_deleted",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = ["id", "last_run", "records_deleted", "created_at", "updated_at"]
 
@@ -207,6 +287,7 @@ class RetentionPolicySerializer(serializers.ModelSerializer):
 # ---------------------------------------------------------------------------
 # Dashboard / aggregate serializer
 # ---------------------------------------------------------------------------
+
 
 class ActivitySummarySerializer(serializers.Serializer):
     period = serializers.CharField()

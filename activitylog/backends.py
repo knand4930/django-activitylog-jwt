@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 # Base
 # ---------------------------------------------------------------------------
 
+
 class BaseBackend:
     """Interface that all backends must implement."""
 
@@ -49,6 +50,7 @@ class BaseBackend:
 # Synchronous ORM backend (original behaviour)
 # ---------------------------------------------------------------------------
 
+
 class ModelBackend(BaseBackend):
     """Write directly to the database using Django ORM (synchronous)."""
 
@@ -58,30 +60,35 @@ class ModelBackend(BaseBackend):
 
     def crud(self, data: dict[str, Any]):
         from activitylog.models import CRUDEvent
+
         obj = CRUDEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
     def login(self, data: dict[str, Any]):
         from activitylog.models import LoginEvent
+
         obj = LoginEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
     def request(self, data: dict[str, Any]):
         from activitylog.models import RequestEvent
+
         obj = RequestEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
     def cors(self, data: dict[str, Any]):
         from activitylog.models import CorsEvent
+
         obj = CorsEvent.objects.create(**data)
         self._stamp(obj)
         return obj
 
     def system(self, data: dict[str, Any]):
         from activitylog.models import SystemEvent
+
         obj = SystemEvent.objects.create(**data)
         self._stamp(obj)
         return obj
@@ -91,11 +98,13 @@ class ModelBackend(BaseBackend):
 # Async backend (Celery tasks with sync fallback)
 # ---------------------------------------------------------------------------
 
+
 class AsyncBackend(BaseBackend):
     """Dispatch writes to Celery tasks.  Falls back to synchronous on missing broker."""
 
     def _dispatch(self, event_type: str, data: dict[str, Any]) -> None:
         from activitylog.tasks.log_tasks import dispatch_log_task
+
         dispatch_log_task(event_type, data)
 
     def crud(self, data: dict[str, Any]) -> None:
@@ -118,6 +127,7 @@ class AsyncBackend(BaseBackend):
 # Multi-backend fan-out
 # ---------------------------------------------------------------------------
 
+
 class MultiBackend(BaseBackend):
     """Write to multiple backends simultaneously.
 
@@ -133,9 +143,7 @@ class MultiBackend(BaseBackend):
         from django.conf import settings
         from django.utils.module_loading import import_string
 
-        backend_paths: list[str] = getattr(
-            settings, "DJANGO_ACTIVITY_LOG_MULTI_BACKENDS", []
-        )
+        backend_paths: list[str] = getattr(settings, "DJANGO_ACTIVITY_LOG_MULTI_BACKENDS", [])
         self._backends: list[BaseBackend] = [import_string(p)() for p in backend_paths]
 
     def _fan_out(self, method: str, data: dict[str, Any]) -> None:
@@ -143,8 +151,9 @@ class MultiBackend(BaseBackend):
             try:
                 getattr(backend, method)(data)
             except Exception as exc:
-                logger.exception("MultiBackend '%s' failed for %s: %s",
-                                 type(backend).__name__, method, exc)
+                logger.exception(
+                    "MultiBackend '%s' failed for %s: %s", type(backend).__name__, method, exc
+                )
 
     def crud(self, data):
         self._fan_out("crud", data)
@@ -165,6 +174,7 @@ class MultiBackend(BaseBackend):
 # ---------------------------------------------------------------------------
 # ClickHouse backend
 # ---------------------------------------------------------------------------
+
 
 class ClickHouseBackend(BaseBackend):
     """Write activity log events directly to ClickHouse.
@@ -191,6 +201,7 @@ class ClickHouseBackend(BaseBackend):
     def _get_client(self):
         if self._CLIENT is None:
             from django.conf import settings
+
             try:
                 from clickhouse_driver import Client
             except ImportError as exc:
@@ -212,8 +223,10 @@ class ClickHouseBackend(BaseBackend):
 
     def _insert(self, table: str, data: dict[str, Any]) -> None:
         client = self._get_client()
-        clean = {k: (str(v) if not isinstance(v, (int, float, str, type(None))) else v)
-                 for k, v in data.items()}
+        clean = {
+            k: (str(v) if not isinstance(v, (int, float, str, type(None))) else v)
+            for k, v in data.items()
+        }
         columns = list(clean.keys())
         values = [list(clean.values())]
         client.execute(
@@ -241,6 +254,7 @@ class ClickHouseBackend(BaseBackend):
 # MongoDB backend
 # ---------------------------------------------------------------------------
 
+
 class MongoBackend(BaseBackend):
     """Write activity log events to MongoDB.
 
@@ -261,12 +275,12 @@ class MongoBackend(BaseBackend):
     def _get_db(self):
         if self._DB is None:
             from django.conf import settings
+
             try:
                 import pymongo
             except ImportError as exc:
                 raise RuntimeError(
-                    "pymongo is required for MongoBackend. "
-                    "Install it with: pip install pymongo"
+                    "pymongo is required for MongoBackend. Install it with: pip install pymongo"
                 ) from exc
 
             cfg = getattr(settings, "ACTIVITYLOG_MONGODB", {})
@@ -276,8 +290,10 @@ class MongoBackend(BaseBackend):
 
     def _insert(self, collection: str, data: dict[str, Any]) -> None:
         db = self._get_db()
-        doc = {k: (str(v) if not isinstance(v, (int, float, str, bool, type(None), dict, list)) else v)
-               for k, v in data.items()}
+        doc = {
+            k: (str(v) if not isinstance(v, (int, float, str, bool, type(None), dict, list)) else v)
+            for k, v in data.items()
+        }
         db[collection].insert_one(doc)
 
     def crud(self, data):
@@ -299,6 +315,7 @@ class MongoBackend(BaseBackend):
 # ---------------------------------------------------------------------------
 # ScyllaDB / Cassandra backend
 # ---------------------------------------------------------------------------
+
 
 class ScyllaDBBackend(BaseBackend):
     """Write activity log events to ScyllaDB (or Apache Cassandra).
@@ -323,6 +340,7 @@ class ScyllaDBBackend(BaseBackend):
     def _get_session(self):
         if self._SESSION is None:
             from django.conf import settings
+
             try:
                 from cassandra.auth import PlainTextAuthProvider
                 from cassandra.cluster import Cluster

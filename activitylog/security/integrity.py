@@ -50,6 +50,7 @@ def decrypt_credential(token: str) -> str:
 # HMAC-based tamper detection
 # ---------------------------------------------------------------------------
 
+
 def compute_hmac(data: dict) -> str:
     """Compute HMAC-SHA256 signature for a log entry dict."""
     key = settings.SECRET_KEY.encode()
@@ -67,6 +68,7 @@ def verify_hmac(data: dict, signature: str) -> bool:
 # Bulk integrity checker
 # ---------------------------------------------------------------------------
 
+
 class IntegrityChecker:
     """Verify integrity hashes across all event tables."""
 
@@ -81,6 +83,7 @@ class IntegrityChecker:
                 RequestEvent,
                 SystemEvent,
             )
+
             self.MODELS = [CRUDEvent, LoginEvent, RequestEvent, CorsEvent, SystemEvent]
         return self.MODELS
 
