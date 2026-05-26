@@ -329,7 +329,7 @@ jobs:
       url: https://pypi.org/project/django-activitylog-jwt/
 
     env:
-      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN || secrets.access_pypi_password }}
+      PYPI_API_TOKEN: ${{ secrets.ACCESS_PYPI_PASSWORD }}
 
     steps:
       - name: Download distribution artifacts
