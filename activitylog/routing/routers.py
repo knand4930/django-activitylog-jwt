@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class ActivityLogDatabaseRouter:
 
     _CONFIG_MODELS = frozenset({"databaseconfig", "retentionpolicy"})
 
-    def _alias_for_model(self, model: type, tenant_id: str | None = None) -> str | None:
+    def _alias_for_model(self, model: Any, tenant_id: str | None = None) -> str | None:
         """Return the best matching database alias for ``model``, or None."""
         label = model._meta.app_label
         name = model._meta.model_name
@@ -66,10 +67,10 @@ class ActivityLogDatabaseRouter:
 
         return None
 
-    def db_for_read(self, model: type, **hints: object) -> str | None:
+    def db_for_read(self, model: Any, **hints: object) -> str | None:
         return self._alias_for_model(model)
 
-    def db_for_write(self, model: type, **hints: object) -> str | None:
+    def db_for_write(self, model: Any, **hints: object) -> str | None:
         return self._alias_for_model(model)
 
     def allow_relation(self, obj1: object, obj2: object, **hints: object) -> bool | None:

@@ -8,6 +8,7 @@ ship.
 from __future__ import annotations
 
 import sys
+from typing import Any
 
 import django
 
@@ -79,7 +80,7 @@ def make_index(*fields: str, name: str | None = None):
     """Return a ``models.Index`` compatible with Django 4.x – 6.x."""
     from django.db.models import Index
 
-    kwargs = {"fields": list(fields)}
+    kwargs: dict[str, Any] = {"fields": list(fields)}
     if name:
         kwargs["name"] = name
     return Index(**kwargs)
@@ -91,10 +92,7 @@ def url_path(route: str, view, name: str | None = None):
     but this helper makes it easy to migrate in the future."""
     from django.urls import path
 
-    kwargs = {}
-    if name:
-        kwargs["name"] = name
-    return path(route, view, **kwargs)
+    return path(route, view, name=name)
 
 
 # ---------------------------------------------------------------------------

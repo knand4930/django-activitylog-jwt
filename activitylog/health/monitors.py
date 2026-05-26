@@ -81,6 +81,8 @@ class DatabaseHealthMonitor:
         from activitylog.routing.registry import ensure_config_registered
 
         alias = ensure_config_registered(cfg)
+        if alias is None:
+            raise RuntimeError("database configuration could not be registered")
         from django.db import connections
 
         conn = connections[alias]
@@ -111,7 +113,7 @@ class DatabaseHealthMonitor:
         except ImportError as exc:
             raise RuntimeError("pymongo not installed") from exc
         uri = f"mongodb://{cfg.host}:{cfg.port or 27017}"
-        client = pymongo.MongoClient(uri, serverSelectionTimeoutMS=3000)
+        client: Any = pymongo.MongoClient(uri, serverSelectionTimeoutMS=3000)
         client.server_info()
         client.close()
 

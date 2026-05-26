@@ -107,7 +107,7 @@ dev = [
     "pytest-asyncio>=0.23",
     "coverage[toml]>=7.4",
     "ruff>=0.4",
-    "mypy>=1.9",
+    "mypy>=1.9,<2",
     "django-stubs>=5.0",
     "djangorestframework-stubs>=3.15",
 ]
@@ -197,10 +197,17 @@ ignore = [
 # Mypy
 # ---------------------------------------------------------------------------
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 plugins        = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
 strict         = false
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    "activitylog.crudhistory_admin_mixin",
+    "activitylog.migrations.*",
+]
+ignore_errors = true
 
 [tool.django-stubs]
 django_settings_module = "tests.settings"
