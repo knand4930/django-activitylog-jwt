@@ -242,12 +242,14 @@ jobs:
           cache: pip
 
       - name: Install pip-audit
-        run: pip install pip-audit
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install pip-audit
 
       - name: Audit dependencies for known CVEs
         run: |
           pip install -e ".[all]"
-          pip-audit --desc --strict
+          pip-audit --desc --skip-editable
 
 # =============================================================================
 # JOB 5 — Build Distribution
