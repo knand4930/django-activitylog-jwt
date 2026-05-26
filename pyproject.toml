@@ -112,6 +112,13 @@ dev = [
     "djangorestframework-stubs>=3.15",
 ]
 
+# Documentation builds on Read the Docs.
+docs = [
+    "sphinx>=7.2",
+    "sphinx-rtd-theme>=2.0",
+    "myst-parser>=2.0",
+]
+
 # Convenience: everything
 all = [
     "celery>=5.3.0",
