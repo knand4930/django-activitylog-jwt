@@ -348,8 +348,8 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           username: __token__
-          password: ${{ env.PYPI_API_TOKEN }}
-          skip-existing: true
+          password: ${{ secrets.access_pypi_password }}
+          repository_url: https://upload.pypi.org/legacy/
 
       # ── Option B: Trusted Publishing (OIDC) — no long-lived secrets needed ──
       # Configure at https://pypi.org/manage/project/django-activitylog-jwt/settings/
